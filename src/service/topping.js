@@ -66,3 +66,13 @@ export const updateTopping = async ({ groupId, toppingId, name, price }) => {
     return error.response?.data || { message: "Unknown error occurred" };
   }
 };
+
+export const removeToppingGroup = async ({ groupId }) => {
+  try {
+    const res = await axios.delete(`/topping/topping-group/${groupId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error removing topping:", error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};

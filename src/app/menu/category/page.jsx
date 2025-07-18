@@ -1,56 +1,59 @@
 'use client';
 
-import NavBar from "../../../components/NavBar";
-import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import Header from "../../../components/Header";
-import LabelWithIcon from "../../../components/LableWithIcon";
-import Modal from "../../../components/Modal";
+import React, { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import NavBar from "@/components/NavBar";
+import LabelWithIcon from "@/components/LableWithIcon";
+import Modal from "@/components/Modal";
+import { toast } from "react-toastify";
 import {
-    useGetAllCategoriesQuery,
-    useCreateCategoryMutation,
-    useUpdateCategoryMutation,
-    useDeleteCategoryMutation,
-} from "../../../redux/features/category/categoryApi";
-import { useDispatch } from "react-redux";
+    getAllCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory
+} from "@/service/category";
 
 const Page = () => {
-    const dispatch = useDispatch();
-    const storeData = localStorage.getItem("store");
-    const storeId = JSON.parse(storeData)?._id;
-
-    const { data: categoryData, isLoading, error, refetch } = useGetAllCategoriesQuery({ storeId });
-    const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
-    const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
-    const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+    const storeData = typeof window !== 'undefined' ? localStorage.getItem("store") : null;
+    const storeId = storeData ? JSON.parse(storeData)?._id : null;
 
     const [categories, setCategories] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [categoryName, setCategoryName] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        refetch();
-    }, [refetch]);
-
-    useEffect(() => {
-        if (categoryData?.data) {
-            setCategories(categoryData.data);
+    const fetchCategories = async () => {
+        try {
+            setIsLoading(true);
+            const res = await getAllCategories({ storeId });
+            setCategories(res?.data || []);
+        } catch (err) {
+            toast.error("Lỗi khi tải danh mục");
+            console.error(err);
+        } finally {
+            setIsLoading(false);
         }
-    }, [categoryData]);
+    };
+
+    useEffect(() => {
+        if (storeId) fetchCategories();
+    }, [storeId]);
 
     const handleCreateCategory = async (e) => {
         e.preventDefault();
         if (!categoryName.trim()) return;
 
         try {
-            await createCategory({ storeId, name: categoryName }).unwrap();
+            await createCategory({ storeId, name: categoryName });
+            toast.success("Tạo danh mục thành công");
             setIsModalOpen(false);
             setCategoryName("");
-            await refetch();
+            await fetchCategories();
         } catch (err) {
-            console.error("Failed to create category:", err);
+            toast.error("Tạo danh mục thất bại");
+            console.error(err);
         }
     };
 
@@ -58,13 +61,15 @@ const Page = () => {
         if (!categoryName.trim() || !selectedCategory) return;
 
         try {
-            await updateCategory({ categoryId: selectedCategory._id, name: categoryName }).unwrap();
+            await updateCategory({ categoryId: selectedCategory._id, name: categoryName });
+            toast.success("Cập nhật danh mục thành công");
             setIsModalOpen(false);
             setCategoryName("");
             setSelectedCategory(null);
-            await refetch();
+            await fetchCategories();
         } catch (err) {
-            console.error("Failed to update category:", err);
+            toast.error("Cập nhật danh mục thất bại");
+            console.error(err);
         }
     };
 
@@ -72,12 +77,14 @@ const Page = () => {
         if (!selectedCategory) return;
 
         try {
-            await deleteCategory({ categoryId: selectedCategory._id }).unwrap();
+            await deleteCategory({ categoryId: selectedCategory._id });
+            toast.success("Xóa danh mục thành công");
             setIsDeleteModalOpen(false);
             setSelectedCategory(null);
-            await refetch();
+            await fetchCategories();
         } catch (err) {
-            console.error("Failed to delete category:", err);
+            toast.error("Xóa danh mục thất bại");
+            console.error(err);
         }
     };
 
@@ -91,7 +98,7 @@ const Page = () => {
                 }}
                 onConfirm={selectedCategory ? handleUpdateCategory : handleCreateCategory}
                 title={selectedCategory ? "Cập nhật danh mục" : "Thêm danh mục"}
-                confirmTitle={isCreating || isUpdating ? "Đang lưu..." : "Lưu"}
+                confirmTitle="Lưu"
                 closeTitle="Hủy"
             >
                 <form onSubmit={selectedCategory ? handleUpdateCategory : handleCreateCategory}>
@@ -111,7 +118,7 @@ const Page = () => {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteCategory}
                 title="Xác nhận xóa"
-                confirmTitle={isDeleting ? "Đang xóa..." : "Xóa"}
+                confirmTitle="Xóa"
                 closeTitle="Hủy"
             >
                 <p>Bạn có chắc chắn muốn xóa danh mục này?</p>
@@ -121,26 +128,31 @@ const Page = () => {
             <div className="flex justify-between items-center border-b pb-2 mx-4 mt-24">
                 <LabelWithIcon title="Thêm" iconPath="/assets/plus.png" onClick={() => setIsModalOpen(true)} />
             </div>
+
             <div className="pt-4 pb-4 bg-gray-100 mt-4 h-full">
                 {isLoading ? (
                     <p className="text-center text-gray-500">Đang tải danh mục...</p>
-                ) : error ? (
-                    <p className="text-center text-red-500">Lỗi khi tải danh mục</p>
                 ) : (
                     <div className="bg-white rounded-md p-2">
                         {categories.map((item) => (
-                            <CategoryItem key={item._id} item={item} onEdit={() => {
-                                setSelectedCategory(item);
-                                setCategoryName(item.name);
-                                setIsModalOpen(true);
-                            }} onDelete={() => {
-                                setSelectedCategory(item);
-                                setIsDeleteModalOpen(true);
-                            }} />
+                            <CategoryItem
+                                key={item._id}
+                                item={item}
+                                onEdit={() => {
+                                    setSelectedCategory(item);
+                                    setCategoryName(item.name);
+                                    setIsModalOpen(true);
+                                }}
+                                onDelete={() => {
+                                    setSelectedCategory(item);
+                                    setIsDeleteModalOpen(true);
+                                }}
+                            />
                         ))}
                     </div>
                 )}
             </div>
+
             <NavBar page="" />
         </>
     );

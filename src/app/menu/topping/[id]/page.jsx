@@ -1,25 +1,28 @@
 'use client';
 
-import NavBar from "../../../../components/NavBar";
 import React, { useState, useEffect } from "react";
-import Header from "../../../../components/Header";
-import LabelWithIcon from "../../../../components/LableWithIcon";
-import Modal from "../../../../components/Modal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Header from "@/components/Header";
+import NavBar from "@/components/NavBar";
+import Modal from "@/components/Modal";
+import LabelWithIcon from "@/components/LableWithIcon";
 import {
-    useGetToppingQuery,
-    useAddToppingToGroupMutation,
-    useRemoveToppingFromGroupMutation,
-    useUpdateToppingMutation,
-} from "../../../../redux/features/topping/toppingApi";
+    getTopping,
+    addToppingToGroup,
+    removeToppingFromGroup,
+    updateTopping,
+    removeToppingGroup
+} from "@/service/topping";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Page = () => {
-    const { id: groupId } = useParams(); // Get groupId from URL
-    const { data, isLoading, refetch } = useGetToppingQuery({ groupId });
+    const { id: groupId } = useParams();
+    const router = useRouter();
 
-    const [addTopping] = useAddToppingToGroupMutation();
-    const [removeTopping] = useRemoveToppingFromGroupMutation();
-    const [updateTopping] = useUpdateToppingMutation();
+    const [toppingGroup, setToppingGroup] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddToppingModalOpen, setIsAddToppingModalOpen] = useState(false);
@@ -28,15 +31,23 @@ const Page = () => {
     const [newToppingName, setNewToppingName] = useState("");
     const [newToppingPrice, setNewToppingPrice] = useState("");
 
-    const [toppingGroup, setToppingGroup] = useState(null);
+    const fetchToppings = async () => {
+        try {
+            setIsLoading(true);
+            const res = await getTopping({ groupId });
+            setToppingGroup(res?.data);
+        } catch (err) {
+            console.error("Failed to fetch toppings:", err);
+            setError("Lỗi khi tải dữ liệu topping");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (data?.data) {
-            setToppingGroup(data.data);
-        }
-    }, [data]);
+        if (groupId) fetchToppings();
+    }, [groupId]);
 
-    // Open Edit Modal (for name & price)
     const openEditModal = (topping) => {
         setSelectedTopping(topping);
         setNewToppingName(topping.name);
@@ -44,41 +55,76 @@ const Page = () => {
         setIsEditModalOpen(true);
     };
 
-    // Update topping (name & price)
     const handleUpdateTopping = async () => {
-        if (selectedTopping && newToppingName.trim() && newToppingPrice.trim()) {
+        if (!selectedTopping || !newToppingName.trim() || !newToppingPrice.trim()) return;
+        try {
             await updateTopping({
                 groupId,
                 toppingId: selectedTopping._id,
                 name: newToppingName,
                 price: parseFloat(newToppingPrice),
             });
+            await fetchToppings();
             setIsEditModalOpen(false);
-            refetch();
+            toast.success("Cập nhật topping thành công!");
+        } catch (err) {
+            console.error("Failed to update topping:", err);
+            toast.error("Lỗi khi cập nhật topping!");
         }
     };
 
-    // Add new topping
     const handleAddTopping = async () => {
-        if (!newToppingName.trim() || !String(newToppingPrice).trim()) return;
-        await addTopping({ groupId, name: newToppingName, price: parseFloat(newToppingPrice) });
-        refetch();
-        setIsAddToppingModalOpen(false);
-        setNewToppingName("");
-        setNewToppingPrice("");
+        if (!newToppingName.trim() || !newToppingPrice.trim()) return;
+        try {
+            await addToppingToGroup({
+                groupId,
+                name: newToppingName,
+                price: parseFloat(newToppingPrice),
+            });
+            await fetchToppings();
+            setIsAddToppingModalOpen(false);
+            setNewToppingName("");
+            setNewToppingPrice("");
+            toast.success("Thêm topping thành công!");
+        } catch (err) {
+            console.error("Failed to add topping:", err);
+            toast.error("Lỗi khi thêm topping!");
+        }
     };
 
-    // Remove topping
     const handleRemoveTopping = async (toppingId) => {
-        await removeTopping({ groupId, toppingId });
-        refetch();
+        try {
+            await removeToppingFromGroup({ groupId, toppingId });
+            await fetchToppings();
+            toast.success("Xóa topping thành công!");
+        } catch (err) {
+            console.error("Failed to remove topping:", err);
+            toast.error("Lỗi khi xóa topping!");
+        }
     };
 
-    if (isLoading || !toppingGroup) return <div>Loading...</div>;
+    const handleDeleteToppingGroup = async () => {
+        const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa nhóm topping này?");
+        if (!confirmDelete) return;
+
+        try {
+            await removeToppingGroup({ groupId });
+            toast.success("Xóa nhóm topping thành công!");
+            router.push("/menu");
+        } catch (err) {
+            console.error("Failed to delete topping group:", err);
+            toast.error("Đã xảy ra lỗi khi xóa nhóm topping!");
+        }
+    };
+
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div className="text-red-500 p-4">{error}</div>;
 
     return (
         <>
-            {/* Edit Topping Modal (for both name & price) */}
+            <ToastContainer position="top-right" autoClose={2000} />
+
+            {/* Edit Topping Modal */}
             <Modal
                 open={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -134,14 +180,25 @@ const Page = () => {
 
             <Header title={toppingGroup.name || "Nhóm Topping"} goBack={true} />
 
-            <div className="flex space-x-2 mt-24 items-center justify-between mx-4">
+            <div className="flex justify-between items-center mx-4 mt-24">
                 <LabelWithIcon title="Thêm" iconPath="/assets/plus.png" onClick={() => setIsAddToppingModalOpen(true)} />
+                <button
+                    className="bg-red-600 text-white text-sm px-4 py-2 rounded-md"
+                    onClick={handleDeleteToppingGroup}
+                >
+                    Xóa nhóm topping
+                </button>
             </div>
 
             <div className="pt-2 pb-2 bg-gray-100 mt-4">
                 <div className="bg-white rounded-md p-2">
                     {toppingGroup.toppings.map((topping) => (
-                        <ToppingItem key={topping._id} item={topping} openEditModal={openEditModal} onRemove={handleRemoveTopping} />
+                        <ToppingItem
+                            key={topping._id}
+                            item={topping}
+                            openEditModal={openEditModal}
+                            onRemove={handleRemoveTopping}
+                        />
                     ))}
                 </div>
             </div>
@@ -151,17 +208,15 @@ const Page = () => {
     );
 };
 
-const ToppingItem = ({ item, openEditModal, onRemove }) => {
-    return (
-        <div className="flex items-center justify-between bg-white p-3 rounded-md shadow-md my-2">
-            <p className="font-semibold">{item.name}</p>
-            <div className="flex items-center space-x-3">
-                <p className="text-gray-500 mr-4">{item.price}đ</p>
-                <button onClick={() => openEditModal(item)} className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">Sửa</button>
-                <button onClick={() => onRemove(item._id)} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm">Xóa</button>
-            </div>
+const ToppingItem = ({ item, openEditModal, onRemove }) => (
+    <div className="flex items-center justify-between bg-white p-3 rounded-md shadow-md my-2">
+        <p className="font-semibold">{item.name}</p>
+        <div className="flex items-center space-x-3">
+            <p className="text-gray-500 mr-4">{item.price}đ</p>
+            <button onClick={() => openEditModal(item)} className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">Sửa</button>
+            <button onClick={() => onRemove(item._id)} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm">Xóa</button>
         </div>
-    );
-};
+    </div>
+);
 
 export default Page;

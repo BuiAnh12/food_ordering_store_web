@@ -7,7 +7,7 @@ export const getAllCategories = async ({ storeId, limit, page }) => {
         if (page) params.append("page", page);
 
         const response = await axios.get(
-            `/category/store/${storeId}/category?${params.toString()}`
+            `/category/store/${storeId}${params.toString()}`
         );
         return response.data;
     } catch (error) {
@@ -19,7 +19,7 @@ export const getAllCategories = async ({ storeId, limit, page }) => {
 export const createCategory = async ({ storeId, name }) => {
     try {
         const response = await axios.post(
-            `/category/store/${storeId}/add`,
+            `/category/store/${storeId}`,
             { name }
         );
         return response.data;
