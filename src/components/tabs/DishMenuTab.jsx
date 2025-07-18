@@ -87,7 +87,7 @@ const DishTab = () => {
         );
     };
 
-    if (isLoading) return <Loading />; // ✅ Using loading component
+    if (isLoading) return <Loading />;
     if (error) return <p className="text-red-500 text-center mt-4">{error}</p>;
 
     return (
