@@ -3,6 +3,8 @@ const TOKEN_KEY = 'token';
 const ROLE_KEY = 'role';
 const STORE_ID_KEY = 'storeId';
 const STORE_KEY = 'store';
+const ACTIVE_TAB_KEY = 'activeTab'
+const ACTIVE_CONFIRMED_TAB_FILTER = 'confirmedTabFilter'
 
 const localStorageService = {
   // Setters
@@ -20,6 +22,12 @@ const localStorageService = {
   },
   setStore: (store) => {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  },
+  setActiveTab: (tab) => {
+    localStorage.setItem(ACTIVE_TAB_KEY, JSON.stringify(tab))
+  },
+  setActiveFilter: (filter) => {
+    localStorage.setItem(ACTIVE_CONFIRMED_TAB_FILTER, JSON.stringify(filter))
   },
 
   // Getters
@@ -41,6 +49,14 @@ const localStorageService = {
   },
   getStore: () => {
     const val = localStorage.getItem(STORE_KEY);
+    return val ? JSON.parse(val) : null;
+  },
+  getActiveTab: () => {
+    const val = localStorage.getItem(ACTIVE_TAB_KEY);
+    return val ? JSON.parse(val) : null;
+  },
+  getActiveFilter: () =>{
+    const val = localStorage.getItem(ACTIVE_CONFIRMED_TAB_FILTER);
     return val ? JSON.parse(val) : null;
   },
 

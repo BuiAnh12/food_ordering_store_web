@@ -87,7 +87,7 @@ export const refreshAccessToken = async () => {
 
 export const changePassword = async (passwordData) => {
     try {
-        const res = await axios.post("/auth/change-password", passwordData);
+        const res = await axios.put("/auth/change-password", passwordData);
         const data = res.data;
 
         return data;
