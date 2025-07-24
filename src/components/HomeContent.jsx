@@ -8,6 +8,7 @@ const icons = [
   // { href: "/page4", src: "/assets/user.png", label: "Báo cáo" },
   { href: "/store", src: "/assets/user.png", label: "Thông tin cửa hàng" },
   { href: "/staffs", src: "/assets/user.png", label: "Quản lý nhân viên" },
+  { href: "/statistics", src: "/assets/user.png", label: "Báo cáo" },
 ];
 
 const HomeContent = () => {
