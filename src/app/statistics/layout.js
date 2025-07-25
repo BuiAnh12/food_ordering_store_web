@@ -70,7 +70,7 @@ export default function StatisticsLayout({ children }) {
                     {children}
                 </div>
                 <div className="fixed bottom-0 left-0 right-0 bg-white shadow-md z-50">
-                    <NavBar page="home" />
+                    <NavBar page="" />
                 </div>
             </div>
         </Protected>

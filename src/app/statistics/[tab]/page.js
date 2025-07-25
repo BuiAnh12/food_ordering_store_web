@@ -2,6 +2,7 @@ import RevenueTab from "@/components/tabs/statistics/revenueTab";
 import OrderTab from "@/components/tabs/statistics/orderTab";
 import TopItemsTab from "@/components/tabs/statistics/itemTab";
 import CustomerTab from "@/components/tabs/statistics/customerTab";
+import VoucherTab from "@/components/tabs/statistics/voucherTab";
 export default function TabPage({ params }) {
     const { tab } = params;
 
@@ -49,10 +50,7 @@ export default function TabPage({ params }) {
                         <h2 className="text-xl font-semibold mb-2">
                             🎟️ Voucher Performance
                         </h2>
-                        <p className="text-gray-500">
-                            This area covers usage stats and how vouchers affect
-                            your revenue.
-                        </p>
+                        <VoucherTab/>
                     </div>
                 );
             default:

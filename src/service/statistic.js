@@ -157,9 +157,11 @@ export const getAverageSpendingPerOrder = async () => {
 };
 
 
-export const getVoucherUsageSummary = async () => {
+export const getVoucherUsageSummary = async (from, to) => {
   try {
-    const res = await axios.get("/statistics/vouchers/usage-summary");
+    const res = await axios.get("/statistics/vouchers/usage-summary", {
+      params: { from, to },
+    });
     return res.data;
   } catch (error) {
     console.error("Get voucher usage summary error:", error);
@@ -167,9 +169,11 @@ export const getVoucherUsageSummary = async () => {
   }
 };
 
-export const getTopUsedVouchers = async () => {
+export const getTopUsedVouchers = async (limit) => {
   try {
-    const res = await axios.get("/statistics/vouchers/top-used");
+    const res = await axios.get("/statistics/vouchers/top-used", {
+      params: { limit },
+    });
     return res.data;
   } catch (error) {
     console.error("Get top used vouchers error:", error);
