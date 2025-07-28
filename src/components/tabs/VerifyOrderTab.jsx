@@ -49,11 +49,23 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
         }
     }, [order.items]);
 
-    const handleUpdateOrder = async () => {
+    const handleUpdateOrderToFinish = async () => {
         try {
             await updateOrder({
                 orderId: order._id,
                 updatedData: { ...order, status: "finished" },
+            });
+            refetch();
+        } catch (err) {
+            console.error("Update failed:", err);
+        }
+    };
+
+    const handleUpdateOrderToTaken = async () => {
+        try {
+            await updateOrder({
+                orderId: order._id,
+                updatedData: { ...order, status: "taken" },
             });
             refetch();
         } catch (err) {
@@ -88,15 +100,15 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                 <div className="text-sm text-gray-600">{cartQuantity} món</div>
                 {order.status === "finished" ? (
                     <button
-                        className="px-4 py-2 text-white bg-gray-400 rounded-sm cursor-not-allowed"
-                        disabled
+                        className="px-4 py-2 text-white bg-[#fc6011] rounded-sm hover:bg-[#e9550f]"
+                        onClick={handleUpdateOrderToTaken}
                     >
-                        Đã thông báo tài xế
+                        Giao tài xế
                     </button>
                 ) : (
                     <button
                         className="px-4 py-2 text-white bg-[#fc6011] rounded-sm hover:bg-[#e9550f]"
-                        onClick={handleUpdateOrder}
+                        onClick={handleUpdateOrderToFinish}
                     >
                         Thông báo tài xế
                     </button>
@@ -128,6 +140,22 @@ const VerifyOrderTab = ({ storeId }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const urlStatus = searchParams.get("status");
+        const urlPage = searchParams.get("page");
+    
+        if (!urlStatus || !urlPage) {
+            const statusToSet = urlStatus || "all";
+            const pageToSet = urlPage || "1";
+    
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("status", statusToSet);
+            params.set("page", pageToSet);
+    
+            router.replace(`?${params.toString()}`, { scroll: false });
+        }
+    }, []);
 
     const fetchOrders = useCallback(async () => {
         setIsLoading(true);
