@@ -7,7 +7,8 @@ const icons = [
   // { href: "/page3", src: "/assets/user.png", label: "Đánh giá" },
   // { href: "/page4", src: "/assets/user.png", label: "Báo cáo" },
   { href: "/store", src: "/assets/user.png", label: "Thông tin cửa hàng" },
-  { href: "/staffs", src: "/assets/user.png", label: "Quản lý nhân viên" },
+  { href: "/staff", src: "/assets/user.png", label: "Quản lý nhân viên" },
+  { href: "/voucher", src: "/assets/user.png", label: "Quản lý voucher" },
   { href: "/statistics", src: "/assets/user.png", label: "Báo cáo" },
 ];
 
