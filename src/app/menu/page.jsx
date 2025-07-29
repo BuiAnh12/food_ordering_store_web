@@ -23,7 +23,7 @@ const page = () => {
         />
       </div>
 
-      <NavBar page='' />
+      <NavBar page='menu' />
     </>
   );
 };
