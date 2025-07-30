@@ -35,14 +35,14 @@ const NavBar = ({ page }) => {
         <div className='flex items-center gap-[50px]'></div>
         <div className='flex items-center gap-[50px]'></div>
         <div className='flex items-center gap-[20px]'>
-          <Link href='/message' className='flex flex-col  items-center gap-[1px]'>
+          <Link href='/menu' className='flex flex-col  items-center gap-[1px]'>
             <Image
-              src={`${page == "message" ? "/assets/message_active.png" : "/assets/message.png"}`}
+              src={`${page == "menu" ? "/assets/dishes_active.png" : "/assets/dishes.png"}`}
               alt=''
               width={24}
               height={24}
             />
-            <p className={`text-[12px] mt-1 ${page == "message" ? "text-[#fc6011]" : "text-[#4A4B4D]"}`}>Tin nhắn</p>
+            <p className={`text-[12px] mt-1 ${page == "menu" ? "text-[#fc6011]" : "text-[#4A4B4D]"}`}>Món ăn</p>
           </Link>
         </div>
         <div className='flex items-center gap-[20px]'></div>

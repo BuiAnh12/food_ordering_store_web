@@ -2,14 +2,14 @@ import React from "react";
 import IconCard from "../components/IconCard"; // Assuming IconCard is in the same directory
 
 const icons = [
-  { href: "/orders", src: "/assets/user.png", label: "Đơn hàng" },
-  { href: "/menu", src: "/assets/user.png", label: "Thực đơn" },
-  // { href: "/page3", src: "/assets/user.png", label: "Đánh giá" },
-  // { href: "/page4", src: "/assets/user.png", label: "Báo cáo" },
-  { href: "/store", src: "/assets/user.png", label: "Thông tin cửa hàng" },
+  { href: "/orders", src: "/assets/order.png", label: "Đơn hàng" },
+  { href: "/menu", src: "/assets/dishes.png", label: "Thực đơn" },
+  { href: "/store", src: "/assets/admin-icons/store.png", label: "Thông tin cửa hàng" },
+  { href: "/staffs", src: "/assets/staff.png", label: "Quản lý nhân viên" },
+  { href: "/rating", src: "/assets/star.png", label: "Đánh giá" },
   { href: "/staff", src: "/assets/user.png", label: "Quản lý nhân viên" },
   { href: "/voucher", src: "/assets/user.png", label: "Quản lý voucher" },
-  { href: "/statistics", src: "/assets/user.png", label: "Báo cáo" },
+  { href: "/statistics", src: "/assets/report.png", label: "Báo cáo" },
 ];
 
 const HomeContent = () => {
