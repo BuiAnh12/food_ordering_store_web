@@ -12,6 +12,16 @@ export const uploadImages = async (formData) => {
   }
 };
 
+export const uploadRegisterImages = async (formData) => {
+  try {
+    const res = await axios.post("/upload/register/images", formData);
+    return res.data;
+  } catch (error) {
+    console.error("Upload images error:", error);
+    return error.response?.data || { message: "Unknown error occurred" };
+  }
+};
+
 export const uploadAvatar = async (formData) => {
   try {
     const res = await axios.post("/upload/avatar", formData, {
