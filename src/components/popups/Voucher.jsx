@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const VoucherModal = ({
   isOpen,
@@ -64,9 +66,64 @@ const VoucherModal = ({
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const errors = [];
+
+    // Validate các trường bắt buộc
+    if (!formData.code.trim()) errors.push("Mã code là bắt buộc.");
+    if (!formData.discountValue) errors.push("Giá trị giảm là bắt buộc.");
+    if (!formData.startDate) errors.push("Ngày bắt đầu là bắt buộc.");
+    if (!formData.endDate) errors.push("Ngày kết thúc là bắt buộc.");
+
+    if (formData.discountValue < 0) errors.push("Giá trị giảm không được âm.");
+    if (formData.maxDiscount < 0) errors.push("Giảm tối đa không được âm.");
+    if (formData.minOrderAmount < 0)
+      errors.push("Đơn tối thiểu không được âm.");
+    if (formData.usageLimit < 0) errors.push("Số lượt tối đa không được âm.");
+    if (formData.userLimit < 0)
+      errors.push("Giới hạn mỗi người không được âm.");
+
+    if (
+      formData.discountType === "PERCENTAGE" &&
+      Number(formData.discountValue) > 100
+    ) {
+      errors.push("Giá trị phần trăm không được vượt quá 100.");
+    }
+
+    const now = new Date();
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+
+    if (!isUpdate && start < now.setHours(0, 0, 0, 0)) {
+      errors.push("Ngày bắt đầu phải là hôm nay hoặc sau.");
+    }
+
+    if (end <= start) {
+      errors.push("Ngày kết thúc phải sau ngày bắt đầu.");
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => toast.error(err));
+      return;
+    }
+
+    // ✅ Hiện swal để xác nhận hành động
+    const confirmResult = await Swal.fire({
+      title: isUpdate ? "Xác nhận cập nhật?" : "Xác nhận thêm mới?",
+      text: isUpdate
+        ? "Bạn có chắc muốn cập nhật voucher này không?"
+        : "Bạn có chắc muốn thêm voucher này không?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
+      cancelButtonText: "Hủy",
+    });
+
+    if (confirmResult.isConfirmed) {
+      onSubmit(formData);
+    }
   };
 
   if (!isOpen) return null;
@@ -174,15 +231,6 @@ const VoucherModal = ({
               onChange={handleChange}
               disabled={readOnly}
             />
-            {!readOnly && (
-              <Input
-                label="Mã Code"
-                name="code"
-                value={formData.code}
-                onChange={handleChange}
-                disabled={false}
-              />
-            )}
             <Input
               label="Giới hạn mỗi người"
               name="userLimit"

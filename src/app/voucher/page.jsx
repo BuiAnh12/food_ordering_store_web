@@ -239,6 +239,7 @@ const page = () => {
           onClose={() => {
             setShowForm(false);
             setVoucherBeingEdited(null);
+            setViewOnly(false);
           }}
           onSubmit={
             voucherBeingEdited ? handleUpdateVoucher : handleCreateVoucher
