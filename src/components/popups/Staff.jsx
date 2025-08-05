@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const StaffModel = ({
   isOpen,
@@ -40,9 +42,38 @@ const StaffModel = ({
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const errors = [];
+
+    // Validate các trường bắt buộc
+    if (!formData.name.trim()) errors.push("Họ tên không được để trống.");
+    if (!formData.email.trim()) errors.push("Email không được để trống.");
+    if (!formData.phonenumber.trim())
+      errors.push("Số điện thoại không được để trống.");
+    else if (!/^\d+$/.test(formData.phonenumber.trim()))
+      errors.push("Số điện thoại chỉ được chứa chữ số.");
+
+    if (errors.length > 0) {
+      errors.forEach((err) => toast.error(err)); // hoặc alert(err)
+      return;
+    }
+
+    // Có thể xác nhận bằng swal nếu muốn
+    const confirm = await Swal.fire({
+      title: isUpdate
+        ? "Xác nhận cập nhật nhân viên?"
+        : "Xác nhận thêm mới nhân viên?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: isUpdate ? "Cập nhật" : "Thêm",
+      cancelButtonText: "Hủy",
+    });
+
+    if (confirm.isConfirmed) {
+      onSubmit(formData);
+    }
   };
 
   if (!isOpen) return null;
