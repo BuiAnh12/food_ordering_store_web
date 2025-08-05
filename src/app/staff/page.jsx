@@ -49,14 +49,19 @@ const page = () => {
 
   const handleAddStaff = async (data) => {
     try {
-      await createStaff({ storeId, staffData: data });
-      setShowForm(false);
-      const res = await getAllStaff(storeId);
-      if (res.status === "success") {
-        setStaff(res.data);
+      const res = await createStaff({ storeId, staffData: data });
+      console.log(res);
+
+      if (res && res.success === true) {
+        await fetchStaff();
+        setShowForm(false);
+        toast.success("Thêm nhân viên thành công");
+      } else {
+        toast.error(res.message || "Lỗi khi tạo nhân viên");
       }
     } catch (err) {
       alert(err.message || "Lỗi khi tạo nhân viên");
+      toast.error("Lỗi khi tạo nhân viên");
     }
   };
 
@@ -77,13 +82,18 @@ const page = () => {
 
   const handleUpdateStaff = async (data) => {
     try {
-      console.log("Staff edit: ", staffBeingEdited);
-      await updateStaff({ userId: staffBeingEdited._id, staffData: data });
-      setShowForm(false);
-      setStaffBeingEdited(null);
-      const res = await getAllStaff(storeId);
-      if (res.status === "success") {
-        setStaff(res.data);
+      const res = await updateStaff({
+        userId: staffBeingEdited._id,
+        staffData: data,
+      });
+
+      if (res && res.success === true) {
+        await fetchStaff();
+        setShowForm(false);
+        setStaffBeingEdited(null);
+        toast.success("Cập nhật nhân viên thành công");
+      } else {
+        toast.error(res.message || "Lỗi khi tạo nhân viên");
       }
     } catch (err) {
       alert(err.message || "Lỗi khi cập nhật nhân viên");
@@ -125,8 +135,9 @@ const page = () => {
         Swal.fire("Đã xóa!", "Nhân viên đã được xóa.", "success");
 
         const res = await getAllStaff(storeId);
-        if (res.status === "success") {
-          setStaff(res.data);
+        console.log("Res xóa: ", res.success);
+        if (res.success === true) {
+          await fetchStaff();
         }
       } catch (err) {
         Swal.fire("Lỗi!", err.message || "Xóa nhân viên thất bại", "error");
