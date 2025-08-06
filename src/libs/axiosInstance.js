@@ -67,6 +67,7 @@ axiosInstance.interceptors.response.use(
         if (newToken) {
           localStorageService.setToken(newToken)
           processQueue(null, newToken);
+          // Setup other credentials if needed
 
           // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${newToken}`;

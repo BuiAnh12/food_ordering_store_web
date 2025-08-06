@@ -1,3 +1,5 @@
+import { get } from "lodash";
+
 const isBrowser = typeof window !== 'undefined';
 
 const USER_ID_KEY = 'userId';
@@ -7,6 +9,7 @@ const STORE_ID_KEY = 'storeId';
 const STORE_KEY = 'store';
 const ACTIVE_TAB_KEY = 'activeTab';
 const ACTIVE_CONFIRMED_TAB_FILTER = 'confirmedTabFilter';
+const ACTIVE_MENU_TAB = 'activeMenuTab';
 
 const localStorageService = {
   // Setters
@@ -30,6 +33,9 @@ const localStorageService = {
   },
   setActiveFilter: (filter) => {
     if (isBrowser) localStorage.setItem(ACTIVE_CONFIRMED_TAB_FILTER, JSON.stringify(filter));
+  },
+  setActiveMenuTab: (filter) => {
+    if (isBrowser) localStorage.setItem(ACTIVE_MENU_TAB, JSON.stringify(filter));
   },
 
   // Getters
@@ -68,6 +74,11 @@ const localStorageService = {
     const val = localStorage.getItem(ACTIVE_CONFIRMED_TAB_FILTER);
     return val ? JSON.parse(val) : null;
   },
+  getActiveMenuTab: () => {
+    if (!isBrowser) return null;
+    const val = localStorage.getItem(ACTIVE_MENU_TAB);
+    return val ? JSON.parse(val) : null;
+  },
 
   // Clear All
   clearAll: () => {
@@ -77,6 +88,9 @@ const localStorageService = {
       localStorage.removeItem(ROLE_KEY);
       localStorage.removeItem(STORE_ID_KEY);
       localStorage.removeItem(STORE_KEY);
+      localStorage.removeItem(ACTIVE_TAB_KEY);
+      localStorage.removeItem(ACTIVE_CONFIRMED_TAB_FILTER);
+      localStorage.removeItem(ACTIVE_MENU_TAB);
     }
   }
 };
