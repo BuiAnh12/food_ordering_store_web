@@ -36,7 +36,7 @@ export const addToppingToGroup = async ({ groupId, name, price }) => {
 
 export const addToppingGroupOnly = async ({ storeId, name }) => {
   try {
-    const res = await axios.post(`/topping/store/${storeId}/topping-group/add`, { name });
+    const res = await axios.post(`/topping/store/${storeId}/topping-group`, { name });
     return res.data;
   } catch (error) {
     console.error("Error creating topping group:", error);

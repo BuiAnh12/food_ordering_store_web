@@ -1,8 +1,10 @@
 import axios from "../libs/axiosInstance";
 
-export const getAllDish = async (storeId) => {
+export const getAllDish = async (storeId, name) => {
     try {
-        const res = await axios.get(`/dish/store/${storeId}`);
+        const params = {};
+        if (name) params.name = name;
+        const res = await axios.get(`/dish/store/${storeId}`, { params });
         return res.data;
     } catch (error) {
         console.error("Get all dish error:", error);
