@@ -11,8 +11,8 @@ export const SocketProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const userId = localStorageService.getUserId()
-    const storeId = localStorageService.getStoreId()
+    const userId = localStorageService.getUserId();
+    const storeId = localStorageService.getStoreId();
 
     if (!userId) return;
 
@@ -36,13 +36,29 @@ export const SocketProvider = ({ children }) => {
       setNotifications((prev) => [...prev, newNotification]);
     });
 
+    newSocket.on("newNotification", (newNotification) => {
+      setNotifications((prev) => [...prev, newNotification]);
+    });
+
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
+  const sendNotification = ({ userId, title, message, type, orderId }) => {
+    if (!socket) return;
+    socket.emit("sendNotification", { userId, title, message, type, orderId });
+  };
+
   return (
-    <SocketContext.Provider value={{ socket, notifications, setNotifications }}>
+    <SocketContext.Provider
+      value={{
+        socket,
+        notifications,
+        setNotifications,
+        sendNotification, // 👈 expose function
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

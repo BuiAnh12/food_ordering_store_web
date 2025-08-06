@@ -9,6 +9,7 @@ import {
     getDish,
     getToppingFromDish,
     updateDish as updateDishService,
+    deleteDish as deleteDishService,
 } from "@/service/dish";
 import { getAllTopping } from "@/service/topping";
 import { getAllCategories } from "@/service/category";
@@ -32,7 +33,7 @@ const Page = () => {
     const [allToppings, setAllToppings] = useState([]);
     const [categories, setCategories] = useState([]);
     const [showModal, setShowModal] = useState(false);
-
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const storeData =
         typeof window !== "undefined" ? localStorage.getItem("store") : null;
@@ -52,7 +53,6 @@ const Page = () => {
                     ]);
 
                 const dishData = dishRes.data || {};
-                const toppingsFromDish = toppingRes.data || [];
                 const toppingList = allToppingsRes.data || [];
                 const categoryList = categoriesRes.data || [];
 
@@ -61,8 +61,8 @@ const Page = () => {
                 setCategories(categoryList);
 
                 setImage(dishData?.image?.url || null);
-                setSelectedToppings(new Set(dishData.toppingGroups || []));
-                setSelectedCategory(dishData?.category?._id || "");
+                setSelectedToppings(new Set(dishData.toppingGroups?.map((t) => t._id)));
+                setSelectedCategory(dishData.category?._id || "");
                 setFormData({
                     name: dishData.name || "",
                     price: dishData.price || "",
@@ -99,12 +99,12 @@ const Page = () => {
     };
 
     const handleSave = () => setShowModal(true);
+    const handleDelete = () => setShowDeleteModal(true); // 👈 open delete modal
 
     const confirmSave = async () => {
         setShowModal(false);
         let uploadedImage = { filePath: "", url: image };
 
-        // Upload image if new
         if (image && !image.startsWith("http")) {
             try {
                 const fileInput = document.getElementById("imageUpload");
@@ -145,27 +145,30 @@ const Page = () => {
         }
     };
 
+    const confirmDelete = async () => {
+        setShowDeleteModal(false);
+        try {
+            console.log(dish)
+            await deleteDishService({dishId: dish._id});
+            router.push("/menu")
+        } catch (err) {
+            console.error("Delete dish failed", err);
+        }
+    };
+
     return (
         <>
             <Header title="Chi tiết món ăn" goBack={true} />
             <div className="w-full px-5 py-6 mt-12 mb-24">
                 <div className="flex-1 overflow-auto space-y-6">
-                    {/* Image section */}
+                    {/* Image Upload */}
                     <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <label className="block text-sm font-semibold text-gray-700">
-                            Hình ảnh
-                        </label>
+                        <label className="block text-sm font-semibold text-gray-700">Hình ảnh</label>
                         <div className="relative mt-3 w-24 h-24 rounded-md border flex items-center justify-center bg-gray-100">
                             {image ? (
-                                <img
-                                    src={image}
-                                    alt="Uploaded"
-                                    className="w-full h-full rounded-md object-cover"
-                                />
+                                <img src={image} alt="Uploaded" className="w-full h-full rounded-md object-cover" />
                             ) : (
-                                <span className="text-gray-400">
-                                    Chưa có ảnh
-                                </span>
+                                <span className="text-gray-400">Chưa có ảnh</span>
                             )}
                             <input
                                 type="file"
@@ -175,11 +178,7 @@ const Page = () => {
                                 onChange={handleImageUpload}
                             />
                             <button
-                                onClick={() =>
-                                    document
-                                        .getElementById("imageUpload")
-                                        .click()
-                                }
+                                onClick={() => document.getElementById("imageUpload").click()}
                                 className="absolute top-1 right-1 bg-gray-700 text-white text-xs px-2 py-1 rounded-md shadow-md hover:bg-gray-900 transition"
                             >
                                 Sửa
@@ -187,21 +186,15 @@ const Page = () => {
                         </div>
                     </div>
 
-                    {/* Form fields */}
+                    {/* Form Fields */}
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-4">
                         {[
                             { label: "Tên*", name: "name", type: "text" },
                             { label: "Giá*", name: "price", type: "number" },
-                            {
-                                label: "Mô tả",
-                                name: "description",
-                                type: "text",
-                            },
+                            { label: "Mô tả", name: "description", type: "text" },
                         ].map((field, i) => (
                             <div key={i} className="border-b pb-2">
-                                <label className="block text-sm font-semibold text-gray-700">
-                                    {field.label}
-                                </label>
+                                <label className="block text-sm font-semibold text-gray-700">{field.label}</label>
                                 <input
                                     type={field.type}
                                     name={field.name}
@@ -213,16 +206,12 @@ const Page = () => {
                         ))}
                     </div>
 
-                    {/* Category select */}
+                    {/* Category Select */}
                     <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <label className="block text-sm font-semibold text-gray-700">
-                            Danh mục*
-                        </label>
+                        <label className="block text-sm font-semibold text-gray-700">Danh mục*</label>
                         <select
                             value={selectedCategory}
-                            onChange={(e) =>
-                                setSelectedCategory(e.target.value)
-                            }
+                            onChange={(e) => setSelectedCategory(e.target.value)}
                             className="w-full p-2 ring-1 ring-gray-300 my-2 rounded-md outline-none focus:ring-[#fc6011]"
                         >
                             <option value="">Chọn danh mục</option>
@@ -236,9 +225,7 @@ const Page = () => {
 
                     {/* Toppings */}
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800">
-                            Topping của cửa hàng
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-800">Topping của cửa hàng</h3>
                         {allToppings.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                 {allToppings.map((topping) => (
@@ -248,58 +235,55 @@ const Page = () => {
                                     >
                                         <input
                                             type="checkbox"
-                                            checked={selectedToppings.has(
-                                                topping._id
-                                            )}
-                                            onChange={() =>
-                                                handleToppingToggle(topping._id)
-                                            }
+                                            checked={selectedToppings.has(topping._id)}
+                                            onChange={() => handleToppingToggle(topping._id)}
                                         />
                                         {topping.name}
                                     </label>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-500">
-                                Không có topping nào
-                            </p>
+                            <p className="text-gray-500">Không có topping nào</p>
                         )}
                     </div>
 
-                    {/* Save Button */}
+                    {/* Action Buttons */}
                     <div className="flex justify-end w-full items-center">
                         <button
+                            onClick={handleDelete}
+                            className="text-white p-3 px-10 text-md font-semibold rounded-lg bg-red-600"
+                        >
+                            Xóa
+                        </button>
+                        <button
                             onClick={handleSave}
-                            className="text-white p-3 px-10 text-md font-semibold rounded-lg bg-[#fc6011]"
+                            className="text-white p-3 px-10 text-md font-semibold rounded-lg bg-[#fc6011] ml-6"
                         >
                             Lưu
                         </button>
                     </div>
 
-                    {/* Modal confirm */}
+                    {/* Save Modal */}
                     {showModal && (
-                        <div
-                            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                            onClick={() => setShowModal(false)}
-                        >
-                            <div
-                                className="bg-white p-5 rounded-lg shadow-lg p-10"
-                                onClick={(e) => e.stopPropagation()}
-                            >
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowModal(false)}>
+                            <div className="bg-white p-5 rounded-lg shadow-lg p-10" onClick={(e) => e.stopPropagation()}>
                                 <p>Bạn có chắc chắn muốn lưu?</p>
                                 <div className="flex justify-end gap-3 mt-4">
-                                    <button
-                                        onClick={() => setShowModal(false)}
-                                        className="bg-gray-400 text-white px-4 py-2 rounded"
-                                    >
-                                        Đóng
-                                    </button>
-                                    <button
-                                        onClick={confirmSave}
-                                        className="bg-green-500 text-white px-4 py-2 rounded"
-                                    >
-                                        Xác nhận
-                                    </button>
+                                    <button onClick={() => setShowModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Đóng</button>
+                                    <button onClick={confirmSave} className="bg-green-500 text-white px-4 py-2 rounded">Xác nhận</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowDeleteModal(false)}>
+                            <div className="bg-white p-5 rounded-lg shadow-lg p-10" onClick={(e) => e.stopPropagation()}>
+                                <p>Bạn có chắc chắn muốn <strong>xóa</strong> món ăn này?</p>
+                                <div className="flex justify-end gap-3 mt-4">
+                                    <button onClick={() => setShowDeleteModal(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Đóng</button>
+                                    <button onClick={confirmDelete} className="bg-red-600 text-white px-4 py-2 rounded">Xác nhận</button>
                                 </div>
                             </div>
                         </div>

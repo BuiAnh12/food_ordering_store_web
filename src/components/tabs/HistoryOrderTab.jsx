@@ -6,6 +6,25 @@ import ReactPaginate from "react-paginate";
 import generateOrderNumber from "../../utils/generateOrderNumber";
 import { ThreeDots } from "react-loader-spinner";
 
+const paymentTypes  = {
+    cash: "Thanh toán khi nhận hàng",
+    vnpay: "Thanh toán qua VNPay",
+}
+
+const statusTypes = {
+    pending: "Đang chờ",
+    preparing: "Đang chuẩn bị",
+    delivered: "Đã giao",
+    cancelled: "Đã hủy",
+    completed: "Hoàn thành",
+    taken: "Đã lấy",
+    delivering: "Đang giao",
+    done: "Đã xong",
+}
+
+const formatVND = (n) =>
+    (n ?? 0).toLocaleString("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
+
 const OrderCard = ({ order, orderIndex }) => {
     const [cartPrice, setCartPrice] = useState(0);
     const [cartQuantity, setCartQuantity] = useState(0);
@@ -74,23 +93,23 @@ const OrderCard = ({ order, orderIndex }) => {
                 </div>
                 <div className="col-span-6">
                     <p className="text-sm font-medium text-gray-400">
-                        Khoảng cách
+                        Trạng thái
                     </p>
-                    <p className="text-sm font-medium text-gray-800">
-                        {order.distance ?? "n/a"} Km
+                    <p className="text-sm text-gray-800 font-senibold">
+                        {statusTypes[order.status] ?? "n/a"}
                     </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-2">
                 <div className="flex justify-start items-center">
-                    <div className="text-sm text-gray-400 font-light">
-                        {order.paymentMethod || "Thanh toán khi nhận hàng"}
+                    <div className="text-sm text-gray-400 font-bold">
+                        {paymentTypes[order.paymentMethod] || "Thanh toán khi nhận hàng"}
                     </div>
                 </div>
                 <div className="flex justify-end items-center">
                     <div className="text-sm text-[#fc6011] font-bold">
-                        {cartPrice.toFixed(0)}đ
+                        {formatVND(cartPrice)}
                     </div>
                 </div>
             </div>

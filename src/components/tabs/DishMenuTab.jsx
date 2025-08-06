@@ -25,24 +25,23 @@ const DishTab = () => {
 
     const storeData = localStorage.getItem("store");
     const storeId = JSON.parse(storeData)?._id;
+    const fetchDishes = async () => {
+        try {
+            setIsLoading(true);
+            const dishData = await getAllDish(storeId);
+            const newData = transformToMenuFormat(dishData.data);
+            setMenu(newData);
+        } catch (err) {
+            console.error("Failed to fetch dishes", err);
+            setError("Lỗi tải danh sách món");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchDishes = async () => {
-            try {
-                setIsLoading(true);
-                const dishData = await getAllDish(storeId);
-                const newData = transformToMenuFormat(dishData.data);
-                setMenu(newData);
-            } catch (err) {
-                console.error("Failed to fetch dishes", err);
-                setError("Lỗi tải danh sách món");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchDishes();
-    }, [storeId]);
+    }, []);
 
     const toggleItemEnabled = async (id) => {
         try {
