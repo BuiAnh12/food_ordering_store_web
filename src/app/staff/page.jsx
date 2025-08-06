@@ -60,7 +60,6 @@ const page = () => {
         toast.error(res.message || "Lỗi khi tạo nhân viên");
       }
     } catch (err) {
-      alert(err.message || "Lỗi khi tạo nhân viên");
       toast.error("Lỗi khi tạo nhân viên");
     }
   };
