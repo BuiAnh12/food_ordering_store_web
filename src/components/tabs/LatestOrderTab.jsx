@@ -2,19 +2,36 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAllOrders, updateOrder } from "@/service/order";
-
+import { useSocket } from "@/context/SocketContext";
 import ReactPaginate from "react-paginate";
 import { ThreeDots } from "react-loader-spinner";
+
+const formatVND = (n) =>
+    (n ?? 0).toLocaleString("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
 
 const OrderCard = ({ order, orderIndex, refetch }) => {
     const [cartPrice, setCartPrice] = useState(0);
     const [cartQuantity, setCartQuantity] = useState(0);
-
+    const { sendNotification } = useSocket();
     const handleUpdateOrder = async () => {
         if (!order) return;
         try {
             console.log(order._id);
             const updatedOrder = { ...order, status: "confirmed" };
+            console.log("Updating order:", {
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được xác nhận.`,
+                orderId: order._id,
+                type: "info",
+            });
+            sendNotification({
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được xác nhận.`,
+                orderId: order._id,
+                type: "info",
+            });
             const orderId = order._id;
             await updateOrder({ orderId, updatedData: updatedOrder });
             refetch();
@@ -64,7 +81,7 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                             {order.user?.name}
                         </p>
                         <p>
-                            {cartQuantity} Món / {cartPrice.toFixed(0)}đ
+                            {cartQuantity} Món / {formatVND(cartPrice)}
                         </p>
                     </div>
                 </div>

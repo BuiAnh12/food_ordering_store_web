@@ -9,6 +9,7 @@ import ReactPaginate from "react-paginate";
 import { getAllOrders, updateOrder } from "@/service/order";
 import { ThreeDots } from "react-loader-spinner";
 import localStorageService from "@/utils/localStorageService"; // <-- make sure this path is correct
+import { useSocket } from "@/context/SocketContext";
 
 const statusMap = {
     "Tất cả": "all",
@@ -24,6 +25,7 @@ const reverseStatusMap = {
 
 const OrderCard = ({ order, orderIndex, refetch }) => {
     const [cartQuantity, setCartQuantity] = useState(0);
+    const { sendNotification } = useSocket();
 
     useEffect(() => {
         if (order.items) {
@@ -55,6 +57,18 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                 orderId: order._id,
                 updatedData: { ...order, status: "finished" },
             });
+            console.log("Updating order:", {
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được hoàn tất.`,
+                type: "info",
+            });
+            sendNotification({
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được hoàn tất.`,
+                type: "info",
+            });
             refetch();
         } catch (err) {
             console.error("Update failed:", err);
@@ -66,6 +80,18 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
             await updateOrder({
                 orderId: order._id,
                 updatedData: { ...order, status: "taken" },
+            });
+            console.log("Updating order:", {
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
+                type: "info",
+            });
+            sendNotification({
+                userId: order.userId, 
+                title: "Cập nhật trạng thái đơn hàng",
+                message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
+                type: "info",
             });
             refetch();
         } catch (err) {

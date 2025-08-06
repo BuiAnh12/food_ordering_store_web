@@ -40,6 +40,16 @@ export const updateDish = async ({ dishId, updatedData }) => {
     }
 };
 
+export const deleteDish = async ({ dishId }) => {
+    try {
+        const res = await axios.delete(`/dish/${dishId}`);
+        return res.data;
+    } catch (error) {
+        console.error("Update dish error:", error);
+        return error.response?.data || { message: "Unknown error occurred" };
+    }
+};
+
 export const createDish = async ({ storeId, dishData }) => {
     try {
         const res = await axios.post(`/dish/store/${storeId}`, dishData);
@@ -50,9 +60,9 @@ export const createDish = async ({ storeId, dishData }) => {
     }
 };
 
-export const toggleSaleStatus = async (dishId) => {
+export const toggleSaleStatus = async ({dishId}) => {
     try {
-        const res = await axios.post(`/dish/${dishId}/saleStatus`);
+        const res = await axios.post(`/dish/${dishId}/status`);
         return res.data;
     } catch (error) {
         console.error("Toggle sale status error:", error);
