@@ -5,7 +5,7 @@ import {
   registerStoreOwner,
 } from "@/service/register";
 import { uploadRegisterImages } from "@/service/upload";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,25 @@ const Step5Confirm = ({ formData, prevStep }) => {
   const { owner, store, paperWork } = formData;
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    console.log("🧾 paperWork hiện tại:", formData?.paperWork);
+
+    if (formData?.paperWork) {
+      const { IC_front, IC_back, businessLicense, storePicture } =
+        formData.paperWork;
+      console.log("🪪 CMND Mặt Trước:", IC_front?.name);
+      console.log("🪪 CMND Mặt Sau:", IC_back?.name);
+      console.log("📄 Giấy phép KD:", businessLicense?.name);
+      console.log(
+        "🏪 Ảnh cửa hàng:",
+        storePicture?.map((file) => file.name)
+      );
+    }
+  }, [formData.paperWork]);
+
   const handleRegister = async () => {
     setLoading(true);
+    console.log("Paper work: ", paperWork);
     try {
       // 1. Register owner
       const ownerRes = await registerStoreOwner(owner);
@@ -37,15 +54,27 @@ const Step5Confirm = ({ formData, prevStep }) => {
       const [coverUrl] = await uploadRegisterImages(coverForm);
 
       // 3. Upload paperwork
-      const paperworkForm = new FormData();
-      paperworkForm.append("file", paperWork.IC_front);
-      paperworkForm.append("file", paperWork.IC_back);
-      paperworkForm.append("file", paperWork.businessLicense);
+      // Upload IC_front
+      const icFrontForm = new FormData();
+      icFrontForm.append("file", paperWork.IC_front);
+      const [IC_front] = await uploadRegisterImages(icFrontForm);
+
+      // Upload IC_back
+      const icBackForm = new FormData();
+      icBackForm.append("file", paperWork.IC_back);
+      const [IC_back] = await uploadRegisterImages(icBackForm);
+
+      // Upload businessLicense
+      const licenseForm = new FormData();
+      licenseForm.append("file", paperWork.businessLicense);
+      const [businessLicense] = await uploadRegisterImages(licenseForm);
+
+      // Upload storePictures (mảng nhiều ảnh)
+      const storePicsForm = new FormData();
       paperWork.storePicture.forEach((file) => {
-        paperworkForm.append("file", file);
+        storePicsForm.append("file", file);
       });
-      const [IC_front, IC_back, businessLicense, ...storePictures] =
-        await uploadRegisterImages(paperworkForm);
+      const storePictures = await uploadRegisterImages(storePicsForm);
 
       // 4. Final store payload
       const storePayload = {
@@ -61,6 +90,7 @@ const Step5Confirm = ({ formData, prevStep }) => {
         },
       };
 
+      console.log("Register payload ", storePayload);
       // 5. Register store
       const res = await registerStore(storePayload);
       if (res.status === true) {
