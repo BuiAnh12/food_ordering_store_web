@@ -40,7 +40,7 @@ const ShippingFeeModal = ({
     const errors = [];
 
     // Validate số nguyên dương
-    const isPositiveInteger = (val) => /^\d+$/.test(val) && parseInt(val) > 0;
+    const isPositiveInteger = (val) => /^\d+$/.test(val) && parseInt(val) >= 0;
 
     if (!isPositiveInteger(formData.fromDistance)) {
       errors.push("Khoảng cách bắt đầu phải là số nguyên dương.");
