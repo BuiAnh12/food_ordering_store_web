@@ -93,7 +93,7 @@ const DishMenuTab = () => {
     if (error) return <p className="text-red-500 text-center mt-4">{error}</p>;
 
     return (
-        <div className="w-full p-4">
+        <div className="w-full p-4 mb-20">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 border-b pb-2 mb-2">
                 <input
                     type="text"

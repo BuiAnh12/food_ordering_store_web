@@ -8,8 +8,11 @@ export const loginUser = async (credentials) => {
             "/auth/login?getRole=true&getStore=true",
             credentials
         );
+        if (res.status !== 200) {
+            // Defensive, but Axios throws for non-2xx anyway.
+            throw new Error(res.data?.message?.message || "Đăng nhập thất bại!");
+        }
         const data = res.data;
-        console.log("Login response data:", data);
         const token = data.token;
         const storeId = data.storeId;
 
@@ -18,12 +21,25 @@ export const loginUser = async (credentials) => {
         localStorageService.setRole(data.role);
         localStorageService.setStoreId(storeId);
 
-        const decoded = jwtDecode(token);
+        if (token) {
+            const decoded = jwtDecode(token);
+        }
 
-        return data;
+        // Always return {success: true, ...}
+        return { ...data, success: true };
     } catch (error) {
-        console.error("Login error:", error);
-        return error.response?.data || { message: "Unknown error occurred" };
+        // Handle both possible error shapes from backend
+        let msg = "Unknown error occurred";
+        let success = false;
+        if (error.response?.data) {
+            if (typeof error.response.data.message === "string") {
+                msg = error.response.data.message;
+            } else if (typeof error.response.data.message === "object") {
+                msg = error.response.data.message.message || msg;
+                success = error.response.data.message.success === true;
+            }
+        }
+        return { success, message: msg };
     }
 };
 export const getOwneStore = async () => {
