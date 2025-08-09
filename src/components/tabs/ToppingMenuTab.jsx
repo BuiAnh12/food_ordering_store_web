@@ -72,7 +72,7 @@ const ToppingMenuTab = () => {
     if (error) return <p className="p-4 text-red-500">{error}</p>;
 
     return (
-        <div className="w-full p-4">
+        <div className="w-full p-4 mb-20">
             <Modal
                 open={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

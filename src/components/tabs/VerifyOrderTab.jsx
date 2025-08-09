@@ -58,13 +58,13 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                 updatedData: { ...order, status: "finished" },
             });
             console.log("Updating order:", {
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được hoàn tất.`,
                 type: "info",
             });
             sendNotification({
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được hoàn tất.`,
                 type: "info",
@@ -82,13 +82,13 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                 updatedData: { ...order, status: "taken" },
             });
             console.log("Updating order:", {
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
                 type: "info",
             });
             sendNotification({
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
                 type: "info",
@@ -100,7 +100,12 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
     };
 
     return (
-        <div className="border rounded-lg shadow-md p-4 bg-white mb-4">
+        <div
+            className="border rounded-lg shadow-md p-4 bg-white mb-4"
+            data-testid="verify-order-row"
+            data-order-id={order._id}
+            data-status={order.status}
+        >
             <Link href={`orders/${order._id}`} passHref>
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center">
@@ -126,6 +131,7 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                 <div className="text-sm text-gray-600">{cartQuantity} món</div>
                 {order.status === "finished" ? (
                     <button
+                        data-testid="btn-taken"
                         className="px-4 py-2 text-white bg-[#fc6011] rounded-sm hover:bg-[#e9550f]"
                         onClick={handleUpdateOrderToTaken}
                     >
@@ -133,6 +139,7 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                     </button>
                 ) : (
                     <button
+                        data-testid="btn-finish"
                         className="px-4 py-2 text-white bg-[#fc6011] rounded-sm hover:bg-[#e9550f]"
                         onClick={handleUpdateOrderToFinish}
                     >
@@ -170,15 +177,15 @@ const VerifyOrderTab = ({ storeId }) => {
     useEffect(() => {
         const urlStatus = searchParams.get("status");
         const urlPage = searchParams.get("page");
-    
+
         if (!urlStatus || !urlPage) {
             const statusToSet = urlStatus || "all";
             const pageToSet = urlPage || "1";
-    
+
             const params = new URLSearchParams(searchParams.toString());
             params.set("status", statusToSet);
             params.set("page", pageToSet);
-    
+
             router.replace(`?${params.toString()}`, { scroll: false });
         }
     }, []);
@@ -244,102 +251,101 @@ const VerifyOrderTab = ({ storeId }) => {
     }
 
     return (
-      <div className="w-full px-4 py-2">
-          <Dropdown
-              options={dropdownOptions}
-              onChange={handleDropdownChange}
-              value={selectedStatusLabel}
-          />
-          {isLoading ? (
-              <div className="flex justify-center items-center h-screen w-screen">
-                  <ThreeDots
-                      visible={true}
-                      height="80"
-                      width="80"
-                      color="#fc6011"
-                      radius="9"
-                  />
-              </div>
-          ) : (
-              <>
-                  {orders.length === 0 ? (
-                      <p className="text-center text-gray-500 py-10">
-                          Không có đơn hàng nào.
-                      </p>
-                  ) : (
-                      orders.map((order, index) => (
-                          <OrderCard
-                              key={order._id}
-                              order={order}
-                              orderIndex={(
-                                  index +
-                                  (currentPage - 1) * ordersPerPage +
-                                  1
-                              )
-                                  .toString()
-                                  .padStart(2, "0")}
-                              refetch={fetchOrders}
-                          />
-                      ))
-                  )}
-  
-                  <div className="flex items-center justify-center w-full h-max mt-10 mb-20">
-                      <ReactPaginate
-                          previousLabel={
-                              <svg
-                                  className="w-5 h-5"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={2}
-                              >
-                                  <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M15 19l-7-7 7-7"
-                                  />
-                              </svg>
-                          }
-                          nextLabel={
-                              <svg
-                                  className="w-5 h-5"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={2}
-                              >
-                                  <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M9 5l7 7-7 7"
-                                  />
-                              </svg>
-                          }
-                          breakLabel={"..."}
-                          pageCount={totalPages}
-                          marginPagesDisplayed={2}
-                          pageRangeDisplayed={3}
-                          onPageChange={handlePageClick}
-                          forcePage={currentPage - 1}
-                          containerClassName={"pagination flex space-x-2"}
-                          activeClassName={"bg-orange-500 text-white"}
-                          pageClassName={
-                              "border px-3 py-1 rounded-lg cursor-pointer"
-                          }
-                          previousClassName={
-                              "border px-3 py-1 rounded-lg cursor-pointer"
-                          }
-                          nextClassName={
-                              "border px-3 py-1 rounded-lg cursor-pointer"
-                          }
-                          disabledClassName={"opacity-50 cursor-not-allowed"}
-                      />
-                  </div>
-              </>
-          )}
-      </div>
-  );
-  
+        <div className="w-full px-4 py-2">
+            <Dropdown
+                options={dropdownOptions}
+                onChange={handleDropdownChange}
+                value={selectedStatusLabel}
+            />
+            {isLoading ? (
+                <div className="flex justify-center items-center h-screen w-screen">
+                    <ThreeDots
+                        visible={true}
+                        height="80"
+                        width="80"
+                        color="#fc6011"
+                        radius="9"
+                    />
+                </div>
+            ) : (
+                <>
+                    {orders.length === 0 ? (
+                        <p className="text-center text-gray-500 py-10">
+                            Không có đơn hàng nào.
+                        </p>
+                    ) : (
+                        orders.map((order, index) => (
+                            <OrderCard
+                                key={order._id}
+                                order={order}
+                                orderIndex={(
+                                    index +
+                                    (currentPage - 1) * ordersPerPage +
+                                    1
+                                )
+                                    .toString()
+                                    .padStart(2, "0")}
+                                refetch={fetchOrders}
+                            />
+                        ))
+                    )}
+
+                    <div className="flex items-center justify-center w-full h-max mt-10 mb-20">
+                        <ReactPaginate
+                            previousLabel={
+                                <svg
+                                    className="w-5 h-5"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M15 19l-7-7 7-7"
+                                    />
+                                </svg>
+                            }
+                            nextLabel={
+                                <svg
+                                    className="w-5 h-5"
+                                    stroke="currentColor"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            }
+                            breakLabel={"..."}
+                            pageCount={totalPages}
+                            marginPagesDisplayed={2}
+                            pageRangeDisplayed={3}
+                            onPageChange={handlePageClick}
+                            forcePage={currentPage - 1}
+                            containerClassName={"pagination flex space-x-2"}
+                            activeClassName={"bg-orange-500 text-white"}
+                            pageClassName={
+                                "border px-3 py-1 rounded-lg cursor-pointer"
+                            }
+                            previousClassName={
+                                "border px-3 py-1 rounded-lg cursor-pointer"
+                            }
+                            nextClassName={
+                                "border px-3 py-1 rounded-lg cursor-pointer"
+                            }
+                            disabledClassName={"opacity-50 cursor-not-allowed"}
+                        />
+                    </div>
+                </>
+            )}
+        </div>
+    );
 };
 
 export default VerifyOrderTab;

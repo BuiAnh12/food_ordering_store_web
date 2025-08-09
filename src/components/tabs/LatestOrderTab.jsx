@@ -7,7 +7,11 @@ import ReactPaginate from "react-paginate";
 import { ThreeDots } from "react-loader-spinner";
 
 const formatVND = (n) =>
-    (n ?? 0).toLocaleString("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
+    (n ?? 0).toLocaleString("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+    });
 
 const OrderCard = ({ order, orderIndex, refetch }) => {
     const [cartPrice, setCartPrice] = useState(0);
@@ -19,14 +23,14 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
             console.log(order._id);
             const updatedOrder = { ...order, status: "confirmed" };
             console.log("Updating order:", {
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được xác nhận.`,
                 orderId: order._id,
                 type: "info",
             });
             sendNotification({
-                userId: order.userId, 
+                userId: order.userId,
                 title: "Cập nhật trạng thái đơn hàng",
                 message: `Đơn hàng #${order._id} đã được xác nhận.`,
                 orderId: order._id,
@@ -69,29 +73,60 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
         calculateCartPrice();
     }, []);
 
+    // In OrderCard (just the outer <div> and a few spans/buttons)
     return (
-        <div className="border rounded-lg shadow-md p-4 bg-[#FCF5F4] mb-4">
+        <div
+            className="border rounded-lg shadow-md p-4 bg-[#FCF5F4] mb-4"
+            data-testid="order-row"
+            data-order-id={order._id}
+            data-total-qty={cartQuantity}
+            data-total-price={cartPrice}
+        >
             <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
                     <div className="bg-[#fc6011] p-2 text-white font-bold text-lg w-auto h-10 flex items-center justify-center rounded-md">
                         {orderIndex}
                     </div>
                     <div className="ml-2 text-sm text-gray-700">
-                        <p className="font-medium text-gray-800">
+                        <p
+                            className="font-medium text-gray-800"
+                            data-testid="customer-name"
+                        >
                             {order.user?.name}
                         </p>
+
+                        {/* Show totals as before */}
                         <p>
-                            {cartQuantity} Món / {formatVND(cartPrice)}
+                            <span data-testid="total-qty">{cartQuantity}</span>{" "}
+                            Món /
+                            <span data-testid="total-price">
+                                {" "}
+                                {formatVND(cartPrice)}
+                            </span>
+                        </p>
+
+                        {/* Make ID visible for humans + assertable for tests */}
+                        <p
+                            className="text-xs text-gray-400"
+                            data-testid="order-id-text"
+                        >
+                            Mã đơn: <span>{order._id}</span>
                         </p>
                     </div>
                 </div>
             </div>
 
-            <ul className="text-sm text-gray-700 mb-3">
+            <ul className="text-sm text-gray-700 mb-3" data-testid="items">
                 {order.items.map((item, idx) => {
                     const toppingCount = item.toppings?.length || 0;
                     return (
-                        <li key={idx}>
+                        <li
+                            key={idx}
+                            data-testid="item-row"
+                            data-item-name={item.dish?.name}
+                            data-item-qty={item.quantity}
+                            data-item-topping-count={toppingCount}
+                        >
                             {item.quantity} x {item.dish.name}{" "}
                             {toppingCount > 0
                                 ? `(${toppingCount} Topping)`
@@ -102,15 +137,16 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
             </ul>
 
             <div className="flex items-center justify-between">
-                <p className="font-thin text-sm text-gray-400 flex-shrink-0"></p>
                 <div className="flex space-x-4">
                     <button
+                        data-testid="btn-view"
                         className="py-1 px-2 bg-gray-200 text-sm text-gray-700 rounded-md hover:bg-gray-300"
                         onClick={() => router.push(`orders/${order._id}`)}
                     >
                         Xem thêm
                     </button>
                     <button
+                        data-testid="btn-confirm"
                         className="py-1 px-2 bg-[#fc6011] text-sm text-white rounded-md hover:bg-[#e9550f]"
                         onClick={handleUpdateOrder}
                     >

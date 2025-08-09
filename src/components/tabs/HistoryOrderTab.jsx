@@ -29,6 +29,7 @@ const OrderCard = ({ order, orderIndex }) => {
     const [cartPrice, setCartPrice] = useState(0);
     const [cartQuantity, setCartQuantity] = useState(0);
     const router = useRouter();
+    
 
     useEffect(() => {
         if (order.items) {
@@ -60,6 +61,9 @@ const OrderCard = ({ order, orderIndex }) => {
         <div
             className="border rounded-lg shadow-md p-4 bg-white mb-4"
             onClick={() => router.push(`orders/${order._id}`)}
+            data-testid="verify-order-row"
+            data-order-id={order._id}
+            data-status={order.status}
         >
             <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
@@ -129,7 +133,7 @@ const HistoryOrder = ({ storeId }) => {
             setLoading(true);
             const res = await getAllOrders({
                 storeId,
-                status: ["delivered", "cancelled"],
+                status: ["delivered", "cancelled", "completed", "taken", "delivering", "done"],
                 limit: ordersPerPage,
                 page: currentPage,
             });

@@ -42,6 +42,12 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    const authUrls = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/reset-password"];
+    if (authUrls.some(url => originalRequest.url.includes(url))) {
+      // Just reject with the original error
+      return Promise.reject(error);
+    }
+
     // Prevent infinite loop
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
