@@ -94,7 +94,7 @@ const Step5Confirm = ({ formData, prevStep }) => {
       // 5. Register store
       const res = await registerStore(storePayload);
       if (res.status === true) {
-        toast.success("🎉 Đăng ký cửa hàng thành công!");
+        toast.success("Đăng ký cửa hàng thành công!");
         router.push("/auth/login");
       } else {
         await deleteOwner(ownerId);
