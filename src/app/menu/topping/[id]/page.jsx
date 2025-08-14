@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -11,15 +11,16 @@ import {
     addToppingToGroup,
     removeToppingFromGroup,
     updateTopping,
-    removeToppingGroup
+    removeToppingGroup,
 } from "@/service/topping";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import localStorageService from "@/utils/localStorageService";
 const Page = () => {
     const { id: groupId } = useParams();
     const router = useRouter();
-
+    const role = localStorageService.getRole();
+    const blockEdit = role === "staff";
     const [toppingGroup, setToppingGroup] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,7 +28,8 @@ const Page = () => {
     // Modals
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddToppingModalOpen, setIsAddToppingModalOpen] = useState(false);
-    const [isDeleteToppingModalOpen, setIsDeleteToppingModalOpen] = useState(false);
+    const [isDeleteToppingModalOpen, setIsDeleteToppingModalOpen] =
+        useState(false);
     const [isDeleteGroupModalOpen, setIsDeleteGroupModalOpen] = useState(false);
 
     // States for topping edit/add/delete
@@ -62,7 +64,12 @@ const Page = () => {
     };
 
     const handleUpdateTopping = async () => {
-        if (!selectedTopping || !newToppingName.trim() || !newToppingPrice.trim()) return;
+        if (
+            !selectedTopping ||
+            !newToppingName.trim() ||
+            !newToppingPrice.trim()
+        )
+            return;
         try {
             await updateTopping({
                 groupId,
@@ -105,7 +112,10 @@ const Page = () => {
 
     const handleRemoveTopping = async () => {
         try {
-            await removeToppingFromGroup({ groupId, toppingId: toppingToDeleteId });
+            await removeToppingFromGroup({
+                groupId,
+                toppingId: toppingToDeleteId,
+            });
             setIsDeleteToppingModalOpen(false);
             setToppingToDeleteId(null);
             await fetchToppings();
@@ -203,9 +213,7 @@ const Page = () => {
                 confirmTitle="Xoá"
                 closeTitle="Huỷ"
             >
-                <div>
-                    Bạn có chắc chắn muốn xoá topping này không?
-                </div>
+                <div>Bạn có chắc chắn muốn xoá topping này không?</div>
             </Modal>
 
             {/* Confirm Delete Group Modal */}
@@ -218,38 +226,53 @@ const Page = () => {
                 closeTitle="Huỷ"
             >
                 <div>
-                    Bạn có chắc chắn muốn <strong>xóa nhóm topping</strong> này? <br />
+                    Bạn có chắc chắn muốn <strong>xóa nhóm topping</strong> này?{" "}
+                    <br />
                     (Các topping bên trong cũng sẽ bị xóa!)
                 </div>
             </Modal>
 
-            <Header title={toppingGroup?.name || "Nhóm Topping"} goBack={true} />
-
-            <div className="flex justify-between items-center mx-4 mt-24">
-                <LabelWithIcon title="Thêm" iconPath="/assets/plus.png" onClick={() => {
-                    setNewToppingName("");
-                    setNewToppingPrice("");
-                    setIsAddToppingModalOpen(true);
-                }} />
-                <button
-                    className="bg-red-600 text-white text-sm px-4 py-2 rounded-md"
-                    onClick={handleDeleteToppingGroup}
-                >
-                    Xóa nhóm topping
-                </button>
-            </div>
+            <Header
+                title={toppingGroup?.name || "Nhóm Topping"}
+                goBack={true}
+            />
+            <div className="mt-24"></div>
+            {!blockEdit && (
+                <div className="flex justify-between items-center mx-4">
+                    <LabelWithIcon
+                        title="Thêm"
+                        iconPath="/assets/plus.png"
+                        onClick={() => {
+                            setNewToppingName("");
+                            setNewToppingPrice("");
+                            setIsAddToppingModalOpen(true);
+                        }}
+                    />
+                    <button
+                        className="bg-red-600 text-white text-sm px-4 py-2 rounded-md"
+                        onClick={handleDeleteToppingGroup}
+                    >
+                        Xóa nhóm topping
+                    </button>
+                </div>
+            )}
 
             <div className="pt-2 pb-2 bg-gray-100 mt-4">
                 <div className="bg-white rounded-md p-2">
                     {toppingGroup?.toppings?.length === 0 && (
-                        <div className="text-gray-400 text-center italic py-4">Chưa có topping nào</div>
+                        <div className="text-gray-400 text-center italic py-4">
+                            Chưa có topping nào
+                        </div>
                     )}
                     {toppingGroup?.toppings?.map((topping) => (
                         <ToppingItem
                             key={topping._id}
                             item={topping}
                             openEditModal={openEditModal}
-                            confirmDelete={() => confirmDeleteTopping(topping._id)}
+                            confirmDelete={() =>
+                                confirmDeleteTopping(topping._id)
+                            }
+                            blockEdit={blockEdit}
                         />
                     ))}
                 </div>
@@ -260,13 +283,27 @@ const Page = () => {
     );
 };
 
-const ToppingItem = ({ item, openEditModal, confirmDelete }) => (
+const ToppingItem = ({ item, openEditModal, confirmDelete, blockEdit }) => (
     <div className="flex items-center justify-between bg-white p-3 rounded-md shadow-md my-2">
         <p className="font-semibold">{item.name}</p>
         <div className="flex items-center space-x-3">
             <p className="text-gray-500 mr-4">{item.price}đ</p>
-            <button onClick={() => openEditModal(item)} className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">Sửa</button>
-            <button onClick={confirmDelete} className="px-3 py-1 bg-red-600 text-white rounded-md text-sm">Xóa</button>
+            {!blockEdit && (
+                <>
+                    <button
+                        onClick={() => openEditModal(item)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
+                    >
+                        Sửa
+                    </button>
+                    <button
+                        onClick={confirmDelete}
+                        className="px-3 py-1 bg-red-600 text-white rounded-md text-sm"
+                    >
+                        Xóa
+                    </button>
+                </>
+            )}
         </div>
     </div>
 );

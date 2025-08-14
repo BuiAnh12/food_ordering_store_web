@@ -6,12 +6,13 @@ import LabelWithIcon from "@/components/LableWithIcon";
 import Modal from "../Modal";
 import { getAllTopping, addToppingGroupOnly } from "@/service/topping";
 import Loading from "@/components/Loading";
-
+import localStorageService from "@/utils/localStorageService";
 const ToppingMenuTab = () => {
     const router = useRouter();
     const storeData = localStorage.getItem("store");
     const storeId = JSON.parse(storeData)?._id;
-
+    const role = localStorageService.getRole();
+    const blockEdit = role === "staff";
     const [toppingGroups, setToppingGroups] = useState([]);
     const [newGroups, setNewGroups] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -100,13 +101,17 @@ const ToppingMenuTab = () => {
                     className="flex-1 border rounded-lg px-4 py-2"
                 />
             </div>
-            <div className="flex gap-3 mt-2 md:mt-0 justify-end">
-                <LabelWithIcon
-                    title="Thêm nhóm"
-                    iconPath="/assets/plus.png"
-                    onClick={() => setIsModalOpen(true)}
-                />
-            </div>
+            {
+                !blockEdit && (
+                    <div className="flex gap-3 mt-2 md:mt-0 justify-end">
+                        <LabelWithIcon
+                            title="Thêm nhóm"
+                            iconPath="/assets/plus.png"
+                            onClick={() => setIsModalOpen(true)}
+                        />
+                    </div>
+                )
+            }
             <div className="mt-6">
                 {filteredGroups.length === 0 ? (
                     <p className="text-gray-500 text-center">
