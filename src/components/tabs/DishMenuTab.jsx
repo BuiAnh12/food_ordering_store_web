@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loading from "../../components/Loading";
 import LabelWithIcon from "../../components/LableWithIcon";
-
+import localStorageService from "@/utils/localStorageService";
 const DishMenuTab = () => {
     const router = useRouter();
+    const getRole = localStorageService.getRole();
+    const blockEdit = getRole === "staff";
     const storeData =
         typeof window !== "undefined" && localStorage.getItem("store");
     const storeId = storeData ? JSON.parse(storeData)?._id : "";
@@ -103,18 +105,21 @@ const DishMenuTab = () => {
                     onChange={(e) => setSearch(e.target.value)}
                 />
             </div>
-            <div className="flex gap-3 mt-2 md:mt-0 justify-end">
-                <LabelWithIcon
-                    title="Thêm"
-                    iconPath="/assets/plus.png"
-                    onClick={() => router.push("menu/add")}
-                />
-                <LabelWithIcon
-                    title="Chỉnh sửa danh mục"
-                    iconPath="/assets/editing.png"
-                    onClick={() => router.push("menu/category")}
-                />
-            </div>
+            {!blockEdit && (
+                <div className="flex gap-3 mt-2 md:mt-0 justify-end">
+                    <LabelWithIcon
+                        title="Thêm"
+                        iconPath="/assets/plus.png"
+                        onClick={() => router.push("menu/add")}
+                    />
+                    <LabelWithIcon
+                        title="Chỉnh sửa danh mục"
+                        iconPath="/assets/editing.png"
+                        onClick={() => router.push("menu/category")}
+                    />
+                </div>
+            )}
+
             {menu.length === 0 && (
                 <div className="text-center text-gray-500 italic py-10">
                     Không có món ăn nào phù hợp.
@@ -155,7 +160,7 @@ const DishMenuRow = ({ item, router, toggleItemEnabled }) => (
     >
         <div className="flex items-center space-x-3">
             <Image
-                src={item.image?.url || item.image || "/default-dish.png"}
+                src={item.image?.url || "/assets/no-pictures.png"}
                 alt={item.name}
                 width={40}
                 height={40}

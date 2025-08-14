@@ -1,7 +1,7 @@
 import { get } from "lodash";
 
 const isBrowser = typeof window !== 'undefined';
-
+const rolePriority = ['staff', 'manager', 'owner'];
 const USER_ID_KEY = 'userId';
 const TOKEN_KEY = 'token';
 const ROLE_KEY = 'role';
@@ -51,8 +51,19 @@ const localStorageService = {
   },
   getRole: () => {
     if (!isBrowser) return null;
+    
     const val = localStorage.getItem(ROLE_KEY);
-    return val ? JSON.parse(val) : null;
+    if (!val) return null;
+  
+    const roles = JSON.parse(val); // assuming this is an array of roles
+    if (!Array.isArray(roles)) return roles; // if it's just a string, return as is
+  
+    // Sort roles by their index in `rolePriority` and pick the highest
+    const highestRole = roles.sort((a, b) => 
+      rolePriority.indexOf(b) - rolePriority.indexOf(a)
+    )[0];
+  
+    return highestRole || null;
   },
   getStoreId: () => {
     if (!isBrowser) return null;
