@@ -33,7 +33,7 @@ function normalize(s = "") {
     return s.normalize("NFC").trim().toLowerCase();
 }
 
-test("TC09", async ({ page }) => {
+test("TC07 _ Kiểm tra tab 'mới nhất' có đơn hàng vừa đặt không", async ({ page }) => {
     // Arrange: create pending order via API as a client
     const { token, api, orderId } = await createPendingOrder({
         email: CLIENT_EMAIL,
@@ -127,7 +127,7 @@ test("TC09", async ({ page }) => {
     }
 });
 
-test("TC10", async ({ page }) => {
+test("TC8 _ Kiểm tra tab 'đã xác nhận' có đơn hàng với trạng thái đã xác nhận", async ({ page }) => {
     // Arrange: create pending order via API
     const { token, api, orderId } = await createPendingOrder({
         email: CLIENT_EMAIL,
@@ -163,7 +163,7 @@ test("TC10", async ({ page }) => {
     await expect(verifyRow.getByTestId("btn-taken")).toHaveCount(0);
 });
 
-test("TC11", async ({ page }) => {
+test("TC9 _ Kiểm tra tab 'đã xác nhận' có đơn hàng với trạng thái đã xong ", async ({ page }) => {
     // Seed another pending order
     const { token, api, orderId } = await createPendingOrder({
         email: CLIENT_EMAIL,
@@ -207,7 +207,7 @@ test("TC11", async ({ page }) => {
     const orderApi = await getOrderById({ token, api }, orderId);
     expect(orderApi?.data?.status).toBe("finished");
 });
-test("TC12", async ({ page }) => {
+test("TC10 _ Kiểm tra tab 'lịch sử' có đơn hàng với trạng thái đã nhận", async ({ page }) => {
     // Seed another pending order
     const { token, api, orderId } = await createPendingOrder({
         email: CLIENT_EMAIL,
@@ -259,7 +259,7 @@ test("TC12", async ({ page }) => {
     expect(orderApi?.data?.status).toBe("taken");
 });
 
-test("TC13", async ({ page }) => {
+test("TC11 _ Kiểm tra chỉnh sửa order", async ({ page }) => {
     const { token, api, orderId } = await createPendingOrder({
         email: CLIENT_EMAIL,
         password: CLIENT_PASS,
