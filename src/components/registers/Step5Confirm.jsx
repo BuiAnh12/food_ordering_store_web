@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import { ThreeDots } from "react-loader-spinner";
 
 const Step5Confirm = ({ formData, prevStep }) => {
   const router = useRouter();
@@ -270,6 +271,18 @@ const Step5Confirm = ({ formData, prevStep }) => {
           Gửi đăng ký
         </button>
       </div>
+      {loading && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <ThreeDots
+            visible={true}
+            height="80"
+            width="80"
+            color="#fc6011"
+            radius="9"
+            ariaLabel="three-dots-loading"
+          />
+        </div>
+      )}
     </div>
   );
 };
