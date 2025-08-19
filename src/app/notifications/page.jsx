@@ -21,13 +21,16 @@ const page = () => {
 
       <div className='pt-[20px] lg:w-[60%] md:w-[80%] md:mx-auto'>
         {notifications &&
-          notifications.map((notification, index) => (
-            <Notification
-              key={index}
-              notification={notification}
-              handleNotificationStatusChange={handleNotificationStatusChange}
-            />
-          ))}
+          notifications
+            ?.slice()
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((notification, index) => (
+              <Notification
+                key={index}
+                notification={notification}
+                handleNotificationStatusChange={handleNotificationStatusChange}
+              />
+            ))}
       </div>
 
       <div className=''>
