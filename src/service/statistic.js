@@ -169,10 +169,10 @@ export const getVoucherUsageSummary = async (from, to) => {
   }
 };
 
-export const getTopUsedVouchers = async (limit) => {
+export const getTopUsedVouchers = async (limit, from, to) => {
   try {
     const res = await axios.get("/statistics/vouchers/top-used", {
-      params: { limit },
+      params: { limit, from, to },
     });
     return res.data;
   } catch (error) {
@@ -181,9 +181,11 @@ export const getTopUsedVouchers = async (limit) => {
   }
 };
 
-export const getVoucherRevenueImpact = async () => {
+export const getVoucherRevenueImpact = async (from, to) => {
   try {
-    const res = await axios.get("/statistics/vouchers/revenue-impact");
+    const res = await axios.get("/statistics/vouchers/revenue-impact",{
+      params: { from, to },
+    });
     return res.data;
   } catch (error) {
     console.error("Get voucher revenue impact error:", error);

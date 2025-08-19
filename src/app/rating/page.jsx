@@ -174,6 +174,7 @@ const StoreReviewPage = () => {
                         marginPagesDisplayed={2}
                         pageRangeDisplayed={3}
                         onPageChange={handlePageClick}
+                        forcePage={page - 1}
                         containerClassName="pagination flex space-x-2"
                         activeClassName="bg-orange-500 text-white"
                         pageClassName="border px-3 py-1 rounded-lg cursor-pointer"

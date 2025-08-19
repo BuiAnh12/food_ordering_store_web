@@ -6,10 +6,10 @@ import ReactPaginate from "react-paginate";
 import generateOrderNumber from "../../utils/generateOrderNumber";
 import { ThreeDots } from "react-loader-spinner";
 
-const paymentTypes  = {
+const paymentTypes = {
     cash: "Thanh toán khi nhận hàng",
     vnpay: "Thanh toán qua VNPay",
-}
+};
 
 const statusTypes = {
     pending: "Đang chờ",
@@ -20,16 +20,19 @@ const statusTypes = {
     taken: "Đã lấy",
     delivering: "Đang giao",
     done: "Đã xong",
-}
+};
 
 const formatVND = (n) =>
-    (n ?? 0).toLocaleString("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
+    (n ?? 0).toLocaleString("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+    });
 
 const OrderCard = ({ order, orderIndex }) => {
     const [cartPrice, setCartPrice] = useState(0);
     const [cartQuantity, setCartQuantity] = useState(0);
     const router = useRouter();
-    
 
     useEffect(() => {
         if (order.items) {
@@ -71,6 +74,14 @@ const OrderCard = ({ order, orderIndex }) => {
                         <p className="text-gray-700 text-md font-bold">
                             {order.user?.name || "Unknown User"}
                         </p>
+                        <p>
+                            <span data-testid="total-qty">{cartQuantity}</span>{" "}
+                            Món /
+                            <span data-testid="total-price">
+                                {" "}
+                                {formatVND(order.finalTotal)}
+                            </span>
+                        </p>
                         <p className="text-sm text-gray-400 text-light">
                             {generateOrderNumber(order._id)}
                         </p>
@@ -108,7 +119,8 @@ const OrderCard = ({ order, orderIndex }) => {
             <div className="grid grid-cols-2">
                 <div className="flex justify-start items-center">
                     <div className="text-sm text-gray-400 font-bold">
-                        {paymentTypes[order.paymentMethod] || "Thanh toán khi nhận hàng"}
+                        {paymentTypes[order.paymentMethod] ||
+                            "Thanh toán khi nhận hàng"}
                     </div>
                 </div>
                 <div className="flex justify-end items-center">
@@ -133,7 +145,14 @@ const HistoryOrder = ({ storeId }) => {
             setLoading(true);
             const res = await getAllOrders({
                 storeId,
-                status: ["delivered", "cancelled", "completed", "taken", "delivering", "done"],
+                status: [
+                    "delivered",
+                    "cancelled",
+                    "completed",
+                    "taken",
+                    "delivering",
+                    "done",
+                ],
                 limit: ordersPerPage,
                 page: currentPage,
             });
@@ -237,6 +256,7 @@ const HistoryOrder = ({ storeId }) => {
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={3}
                     onPageChange={handlePageClick}
+                    forcePage={currentPage - 1}
                     containerClassName="pagination flex space-x-2"
                     activeClassName="bg-orange-500 text-white"
                     pageClassName="border px-3 py-1 rounded-lg cursor-pointer"
