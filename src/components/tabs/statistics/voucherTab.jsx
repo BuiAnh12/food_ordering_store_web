@@ -25,13 +25,17 @@ const VoucherTab = () => {
       setLoading(true);
       const [summaryRes, topRes, revenueRes] = await Promise.all([
         getVoucherUsageSummary(from, to),
-        getTopUsedVouchers(limit),
-        getVoucherRevenueImpact(),
+        getTopUsedVouchers(limit, from, to),
+        getVoucherRevenueImpact(from, to),
       ]);
+      console.log(summaryRes.data)
+      console.log(topRes.data)
+      console.log(revenueRes.data)
 
       setUsageSummary(summaryRes?.data || {});
-      setTopVouchers(topRes?.data || []);
+      setTopVouchers(Array.isArray(topRes?.data) ? topRes.data : []);
       setRevenueImpact(revenueRes?.data || {});
+      console.log("TopVoucher", topVouchers.length)
     } catch (err) {
       toast.error('Lỗi khi tải dữ liệu voucher');
     } finally {
@@ -86,7 +90,7 @@ const VoucherTab = () => {
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Tổng quan sử dụng</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <SummaryCard title="Số lượt sử dụng" value={usageSummary?.totalUsed || 0} />
+              <SummaryCard title="Số lượt sử dụng" value={usageSummary?.requestedTimeFrameUsed || 0} />
               <SummaryCard title="Số voucher đã phát hành" value={usageSummary?.totalIssued || 0} />
               <SummaryCard title="Tỷ lệ sử dụng" value={`${usageSummary?.usageRate?.toFixed(1) || 0}%`} />
             </div>
@@ -95,11 +99,11 @@ const VoucherTab = () => {
           {/* Top Used Vouchers */}
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Top {limit} Voucher được sử dụng</h3>
-            {topVouchers.length === 0 ? (
+            {topVouchers.length === 0 && Array.isArray(topVouchers) ? (
               <p className="text-gray-500">Không có dữ liệu</p>
             ) : (
               <ul className="list-disc pl-5">
-                {topVouchers.map((voucher, idx) => (
+                {topVouchers?.map((voucher, idx) => (
                   <li key={voucher._id}>
                     <span className="font-semibold">{voucher.code}</span> - {voucher.usedCount} lượt
                   </li>
@@ -113,12 +117,12 @@ const VoucherTab = () => {
             <h3 className="text-lg font-medium mb-2">Ảnh hưởng doanh thu</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SummaryCard
-                title="Tổng doanh thu giảm do áp dụng voucher"
-                value={`${(revenueImpact?.revenueLost || 0).toLocaleString()}₫`}
+                title="Tổng giá trị voucher"
+                value={`${(revenueImpact?.totalDiscountAmount || 0).toLocaleString()}₫`}
               />
               <SummaryCard
-                title="Tổng giá trị đơn hàng sử dụng voucher"
-                value={`${(revenueImpact?.totalVoucherOrderValue || 0).toLocaleString()}₫`}
+                title="Tỉ lệ giám giá"
+                value={`${(revenueImpact?.discountRatio || 0).toLocaleString()}%`}
               />
             </div>
           </div>

@@ -101,7 +101,7 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
                             Món /
                             <span data-testid="total-price">
                                 {" "}
-                                {formatVND(cartPrice)}
+                                {formatVND(order.finalTotal)}
                             </span>
                         </p>
 
@@ -270,6 +270,7 @@ const LatestOrder = ({ storeId }) => {
                     pageCount={totalPages}
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={3}
+                    forcePage={currentPage - 1}
                     onPageChange={handlePageClick}
                     containerClassName="pagination flex space-x-2"
                     activeClassName="bg-orange-500 text-white"
