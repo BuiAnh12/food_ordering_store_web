@@ -31,84 +31,80 @@ const formatVND = (n) =>
     });
 
 const OrderCard = ({ order, orderIndex, refetch }) => {
-    const [cartQuantity, setCartQuantity] = useState(0);
-    const { sendNotification } = useSocket();
+  const [cartQuantity, setCartQuantity] = useState(0);
+  const { sendNotification } = useSocket();
 
-    useEffect(() => {
-        if (order.items) {
-            const total = order.items.reduce(
-                (acc, item) => {
-                    const toppingsPrice =
-                        (Array.isArray(item.toppings)
-                            ? item.toppings.reduce(
-                                  (sum, topping) => sum + (topping.price || 0),
-                                  0
-                              )
-                            : 0) * item.quantity;
+  useEffect(() => {
+    if (order.items) {
+      const total = order.items.reduce(
+        (acc, item) => {
+          const toppingsPrice =
+            (Array.isArray(item.toppings) ? item.toppings.reduce((sum, topping) => sum + (topping.price || 0), 0) : 0) *
+            item.quantity;
 
-                    acc.quantity += item.quantity;
-                    acc.price +=
-                        (item.dish?.price || 0) * item.quantity + toppingsPrice;
-                    return acc;
-                },
-                { price: 0, quantity: 0 }
-            );
+          acc.quantity += item.quantity;
+          acc.price += (item.dish?.price || 0) * item.quantity + toppingsPrice;
+          return acc;
+        },
+        { price: 0, quantity: 0 }
+      );
 
-            setCartQuantity(total.quantity);
-        }
-    }, [order.items]);
+      setCartQuantity(total.quantity);
+    }
+  }, [order.items]);
 
-    const handleUpdateOrderToFinish = async () => {
-        try {
-            await updateOrder({
-                orderId: order._id,
-                updatedData: { ...order, status: "finished" },
-            });
-            console.log("Updating order:", {
-                userId: order.userId,
-                title: "Cập nhật trạng thái đơn hàng",
-                message: `Đơn hàng #${order._id} đã được hoàn tất.`,
-                orderId: order._id,
-                type: "info",
-            });
-            sendNotification({
-                userId: order.userId,
-                title: "Cập nhật trạng thái đơn hàng",
-                message: `Đơn hàng #${order._id} đã được hoàn tất.`,
-                orderId: order._id,
-                type: "info",
-            });
-            refetch();
-        } catch (err) {
-            console.error("Update failed:", err);
-        }
-    };
+  const handleUpdateOrderToFinish = async () => {
+    try {
+      await updateOrder({
+        orderId: order._id,
+        updatedData: { ...order, status: "finished" },
+      });
+      console.log("Updating order:", {
+        userId: order.userId,
+        title: "Cập nhật trạng thái đơn hàng",
+        message: `Đơn hàng #${order._id} đã được hoàn tất.`,
+        orderId: order._id,
+        type: "info",
+      });
+      sendNotification({
+        userId: order.userId,
+        title: "Cập nhật trạng thái đơn hàng",
+        message: `Đơn hàng #${order._id} đã được hoàn tất.`,
+        orderId: order._id,
+        type: "info",
+      });
+      refetch();
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
+  };
 
-    const handleUpdateOrderToTaken = async () => {
-        try {
-            await updateOrder({
-                orderId: order._id,
-                updatedData: { ...order, status: "taken" },
-            });
-            console.log("Updating order:", {
-                userId: order.userId,
-                title: "Cập nhật trạng thái đơn hàng",
-                message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
-                type: "info",
-            });
-            sendNotification({
-                userId: order.userId,
-                title: "Cập nhật trạng thái đơn hàng",
-                message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
-                type: "info",
-            });
-            refetch();
-        } catch (err) {
-            console.error("Update failed:", err);
-        }
-    };
+  const handleUpdateOrderToTaken = async () => {
+    try {
+      await updateOrder({
+        orderId: order._id,
+        updatedData: { ...order, status: "taken" },
+      });
+      console.log("Updating order:", {
+        userId: order.userId,
+        title: "Cập nhật trạng thái đơn hàng",
+        message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
+        type: "info",
+      });
+      sendNotification({
+        userId: order.userId,
+        title: "Cập nhật trạng thái đơn hàng",
+        message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
+        type: "info",
+        orderId: order._id,
+      });
+      refetch();
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
+  };
 
-    return (
+  return (
         <div
             className="border rounded-lg shadow-md p-4 bg-white mb-4"
             data-testid="verify-order-row"
