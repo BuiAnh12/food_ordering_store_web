@@ -89,6 +89,7 @@ const OrderCard = ({ order, orderIndex, refetch }) => {
         title: "Cập nhật trạng thái đơn hàng",
         message: `Đơn hàng #${order._id} đã được nhận bởi shipper.`,
         type: "info",
+        orderId: order._id,
       });
       refetch();
     } catch (err) {
