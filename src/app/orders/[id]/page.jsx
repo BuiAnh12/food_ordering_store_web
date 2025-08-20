@@ -8,6 +8,8 @@ import NavBar from "@/components/NavBar";
 import LatestOrder from "@/components/fragment/LatestOrder";
 import ConfirmedOrder from "@/components/fragment/ConfirmedOrder";
 import HistoryOrder from "@/components/fragment/HistoryOrder";
+import { ThreeDots } from "react-loader-spinner";
+ 
 
 const OrderDetailsPage = () => {
     const { id } = useParams();
@@ -37,7 +39,17 @@ const OrderDetailsPage = () => {
     }, [id]);
 
     if (!id) return <p>Invalid Order ID</p>;
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) return <p>
+        <div className="flex justify-center items-center h-screen w-screen">
+            <ThreeDots
+              visible={true}
+              height="80"
+              width="80"
+              color="#fc6011"
+              radius="9"
+              ariaLabel="three-dots-loading"
+            />
+          </div></p>;
     if (error) return <p>{error}</p>;
     if (!order) return <p>Không tìm thấy đơn hàng</p>;
 
@@ -49,11 +61,8 @@ const OrderDetailsPage = () => {
             case "confirmed":
             case "finished":
                 return <ConfirmedOrder order={order} />;
-            case "delivered":
-            case "cancelled":
-                return <HistoryOrder order={order} />;
             default:
-                return <p>Không xác định trạng thái đơn hàng</p>;
+                return <HistoryOrder order={order} />;
         }
     };
 
