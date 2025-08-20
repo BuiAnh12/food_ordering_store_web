@@ -54,6 +54,11 @@ const ConfirmedOrder = ({ order }) => {
                     {/* Customer Info */}
                     <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md mb-4">
                         <div className="flex items-center gap-3">
+                        <img
+                        src={"/assets/default-avatar.png"}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
                             <div className="ml-0">
                                 <h3 className="text-gray-800 font-medium">
                                     {order?.shipInfo?.contactName ||

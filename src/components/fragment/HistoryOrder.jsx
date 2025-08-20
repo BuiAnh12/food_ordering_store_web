@@ -1,5 +1,22 @@
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import {haversineDistance, calculateTravelTime} from "@/utils/functions"
+import localStorageService from "@/utils/localStorageService"
+const paymentTypes = {
+    cash: "Thanh toán khi nhận hàng",
+    vnpay: "Thanh toán qua VNPay",
+};
+
+const statusTypes = {
+    pending: "Đang chờ",
+    preparing: "Đang chuẩn bị",
+    delivered: "Đã giao",
+    cancelled: "Đã hủy",
+    completed: "Hoàn thành",
+    taken: "Đã lấy",
+    delivering: "Đang giao",
+    done: "Đã xong",
+};
 
 const formatVND = (n) =>
     (n ?? 0).toLocaleString("vi-VN", {
@@ -10,7 +27,9 @@ const formatVND = (n) =>
 
 const HistoryOrder = ({ order }) => {
     const router = useRouter();
-
+    const store = localStorageService.getStore()
+    const [distance, setDistance] = useState(null);
+    const [travelTime, setTravelTime] = useState(null)
     // Optional: recompute for display sanity
     const computed = useMemo(() => {
         const items = order?.items || [];
@@ -27,6 +46,20 @@ const HistoryOrder = ({ order }) => {
         return { subtotal, final };
     }, [order]);
 
+    useEffect(() => {
+        if (
+          order?.shipInfo?.shipLocation?.coordinates &&
+          store?.address?.lat &&
+          store?.address?.lon
+        ) {
+          const coords1 = order.shipInfo.shipLocation.coordinates;
+          const coords2 = [store.address.lon, store.address.lat];
+          const d = haversineDistance(coords1, coords2);
+          setDistance(d.toFixed(2)); // store in km
+          setTravelTime(calculateTravelTime(d.toFixed(2), 40))
+        }
+      }, [order, store]);
+
     return (
         <div className="w-full px-4 py-2 mt-20 mb-20">
             <div className="w-full p-4 bg-gray-50">
@@ -38,7 +71,12 @@ const HistoryOrder = ({ order }) => {
                 {/* Customer Info */}
                 <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md mb-4">
                     <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center"></div>
+                        <img
+                        src={"/assets/default-avatar.png"}
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+
                         <div className="ml-3">
                             <h3 className="text-gray-800 font-medium">
                                 {order?.shipInfo?.contactName ||
@@ -57,14 +95,14 @@ const HistoryOrder = ({ order }) => {
                 </div>
 
                 {/* Driver Info */}
-                <div className="flex items-center bg-white p-4 rounded-lg shadow-md mb-4">
+                {/* <div className="flex items-center bg-white p-4 rounded-lg shadow-md mb-4">
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center"></div>
                     <div className="ml-3">
                         <h3 className="text-gray-800 font-medium">
                             {order?.driver || "Chưa có tài xế"}
                         </h3>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Order Items with toppings + line totals */}
                 <div className="bg-white p-4 rounded-lg shadow-md mb-4">
@@ -198,7 +236,7 @@ const HistoryOrder = ({ order }) => {
                     <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600">Khoảng cách</span>
                         <span className="text-gray-800">
-                            {order?.metadata?.distance || "N/A"}
+                            {distance ? `${distance} km` : "N/A"}
                         </span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -206,7 +244,7 @@ const HistoryOrder = ({ order }) => {
                             Thời gian lấy hàng dự kiến
                         </span>
                         <span className="text-gray-800">
-                            {order?.metadata?.estimatedPickup || "N/A"}
+                            {travelTime ? `${Math.round(travelTime * 60)} phút` : "N/A"}
                         </span>
                     </div>
                 </div>
@@ -218,7 +256,7 @@ const HistoryOrder = ({ order }) => {
                             Trạng thái đơn hàng
                         </span>
                         <span className="text-gray-800">
-                            {order?.status || "Chưa cập nhật"}
+                            {statusTypes[order.status] || "Chưa cập nhật"}
                         </span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -226,7 +264,7 @@ const HistoryOrder = ({ order }) => {
                             Phương thức thanh toán
                         </span>
                         <span className="text-gray-800">
-                            {order?.paymentMethod || "Không xác định"}
+                            {paymentTypes[order.paymentMethod] || "Không xác định"}
                         </span>
                     </div>
                 </div>

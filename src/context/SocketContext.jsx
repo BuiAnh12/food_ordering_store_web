@@ -20,7 +20,7 @@ export const SocketProvider = ({ children }) => {
     setSocket(newSocket);
 
     newSocket.emit("registerUser", userId);
-    if (storeId) newSocket.emit("joinStoreRoom", storeId);
+    if (storeId) newSocket.emit("registerStore", storeId);
 
     console.log("Socket connected");
 
@@ -28,13 +28,11 @@ export const SocketProvider = ({ children }) => {
       setNotifications(allNotifications);
     });
 
-    newSocket.on("getStoreNotifications", (newNotification) => {
-      setNotifications((prev) => [...prev, newNotification]);
+    newSocket.on("newOrderNotification", (payload) => {
+      setNotifications((prev) => [...prev, payload.notification]);
+      console.log("NEW ORDER NOTIFICATION")
     });
 
-    newSocket.on("newOrderNotification", (newNotification) => {
-      setNotifications((prev) => [...prev, newNotification]);
-    });
 
     newSocket.on("newNotification", (newNotification) => {
       setNotifications((prev) => [...prev, newNotification]);
